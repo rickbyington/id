@@ -1,0 +1,17 @@
+<% content_for :title, "User permission" %>
+<p class="mb-2"><%= link_to "← User permissions", admin_user_permissions_path, class: "text-decoration-none small" %></p>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h1 class="h3 mb-0">User permission</h1>
+</div>
+
+<dl class="row">
+  <dt class="col-sm-3">User</dt>
+  <dd class="col-sm-9"><%= link_to @user_permission.user.email, admin_user_path(@user_permission.user) %></dd>
+  <dt class="col-sm-3">Permission</dt>
+  <dd class="col-sm-9"><%= link_to @user_permission.permission.name, admin_permission_path(@user_permission.permission) %><%= " (#{@user_permission.permission.value})" if @user_permission.permission.value.present? %></dd>
+</dl>
+
+<div class="pt-4 mt-4 border-top">
+  <%= button_to admin_user_permission_path(@user_permission), method: :delete, form: { data: { turbo_confirm: "Are you sure? This cannot be undone." } }, class: "btn btn-outline-danger" do %><i class="bi bi-trash me-1"></i>Delete<% end %>
+</div>

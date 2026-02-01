@@ -1,14 +1,24 @@
 Rails.application.routes.draw do
-  # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
+  namespace :admin do
+    root to: "oauth_applications#index"
+    resources :oauth_applications
+    resources :permissions
+    resources :users
+    resources :user_permissions
+  end
 
-  # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
-  # Can be used by load balancers and uptime monitors to verify that the app is live.
+  use_doorkeeper_openid_connect
+  use_doorkeeper
+  devise_for :users, path: "", path_names: {
+    sign_in: "signin",
+    sign_up: "signup",
+    sign_out: "signout",
+    password: "password",
+    confirmation: "confirmation",
+    unlock: "unlock"
+  }
+
   get "up" => "rails/health#show", as: :rails_health_check
-
-  # Render dynamic PWA files from app/views/pwa/* (remember to link manifest in application.html.erb)
-  # get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
-  # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
-
-  # Defines the root path route ("/")
-  # root "posts#index"
+  root to: "home#index"
+  delete "authorized_applications/:application_id", to: "home#revoke_application", as: :revoke_authorized_application
 end

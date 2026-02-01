@@ -1,0 +1,11 @@
+<% content_for :title, "New permission" %>
+<p><%= link_to "← Permissions", admin_permissions_path, class: "text-decoration-none" %></p>
+<h1 class="h3 mb-3">New permission</h1>
+
+<%= form_with model: @permission, url: admin_permissions_path, local: true do |f| %>
+  <%= render "form", f: f %>
+  <div class="d-flex gap-2 mt-3">
+    <%= f.submit "Create permission", class: "btn btn-primary" %>
+    <%= link_to "Cancel", admin_permissions_path, class: "btn btn-outline-secondary" %>
+  </div>
+<% end %>

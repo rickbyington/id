@@ -1,0 +1,28 @@
+<% content_for :title, "Applications" %>
+<h1 class="h3 mb-3">OAuth Applications</h1>
+<p><%= link_to "New application", new_admin_oauth_application_path, class: "btn btn-primary" %></p>
+
+<div class="table-responsive">
+  <table class="table table-striped table-bordered">
+    <thead class="table-light">
+      <tr>
+        <th>Name</th>
+        <th>UID</th>
+        <th>Redirect URI</th>
+        <th>Scopes</th>
+        <th>Auto approve</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @oauth_applications.each do |app| %>
+        <tr>
+          <td><%= link_to app.name, admin_oauth_application_path(app), class: "text-decoration-none fw-medium" %></td>
+          <td><code><%= app.uid %></code></td>
+          <td><%= truncate(app.redirect_uri, length: 40) %></td>
+          <td><%= app.scopes %></td>
+          <td><%= app.auto_approve? ? "Yes" : "No" %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>
