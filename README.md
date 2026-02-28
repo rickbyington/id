@@ -109,10 +109,11 @@ Both images come from one Dockerfile. Default build is Postgres; use `--target s
 
 ### Publishing to Docker Hub
 
-The workflow `.github/workflows/docker-publish.yml` runs on push of a version tag (e.g. `v0.1.0`).
+The workflow `.github/workflows/docker-publish.yml` runs when a version tag (e.g. `v0.1.0`) is pushed. With semantic-release, that tag is pushed after CI passes; the tag must be pushed using a **Personal Access Token** or the Docker workflow will not trigger.
 
 1. Add repo secrets: `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN` (Docker Hub → Account Settings → Security → New Access Token).
-2. Run `bundle install` once so `Gemfile.lock` includes the `sqlite3` gem (required for the standalone image build).
-3. Push a tag: `git tag v0.1.0 && git push origin v0.1.0`
-4. The workflow builds and pushes both images: `id:<version>` and `id:latest` (Postgres), `id:<version>-standalone` and `id:standalone` (SQLite).
+2. Add repo secret **`GH_TOKEN`**: a GitHub Personal Access Token with `repo` scope (Settings → Developer settings → Personal access tokens). The Release workflow uses it to push the version tag so that the tag push triggers Docker Publish. Without `GH_TOKEN`, releases still run but Docker images are not built.
+3. Run `bundle install` once so `Gemfile.lock` includes the `sqlite3` gem (required for the standalone image build).
+4. Push to `main` (with conventional commits); after CI passes, Release runs and pushes a tag, which triggers the Docker workflow. Or push a tag manually: `git tag v0.1.0 && git push origin v0.1.0`.
+5. The workflow builds and pushes both images: `id:<version>` and `id:latest` (Postgres), `id:<version>-standalone` and `id:standalone` (SQLite).
 
