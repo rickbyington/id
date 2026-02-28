@@ -10,7 +10,9 @@ on:
       - main
 
 permissions:
-  contents: write
+  contents: write   # create tag, release, push VERSION/changelog
+  issues: read     # release-notes-generator links commits to PRs/issues
+  pull-requests: read
 
 jobs:
   release:
