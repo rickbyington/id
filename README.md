@@ -107,3 +107,4 @@ The workflow `.github/workflows/docker-publish.yml` runs on push of a version ta
 2. Run `bundle install` once so `Gemfile.lock` includes the `sqlite3` gem (required for the standalone image build).
 3. Push a tag: `git tag v0.1.0 && git push origin v0.1.0`
 4. The workflow builds and pushes both images: `id:<version>` and `id:latest` (Postgres), `id:<version>-standalone` and `id:standalone` (SQLite).
+
