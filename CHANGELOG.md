@@ -1,3 +1,10 @@
+# 1.0.0 (2026-02-28)
+
+
+### Bug Fixes
+
+* initial release ([5d157f1](https://github.com/byingtondesign/id/commit/5d157f166fafd18b52f3dcccb7fc019f9a621272))
+
 # Changelog
 
 All notable changes to this project will be documented in this file.
