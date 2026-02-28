@@ -1,5 +1,5 @@
-# Build and push two Docker images to Docker Hub when a GitHub Release is published.
-# Semantic-release (release.yml) creates the release on push to main; this runs right after.
+# Build and push two Docker images to Docker Hub when a version tag (v*) is pushed.
+# Semantic-release (release.yml) pushes the tag after CI passes; this runs on that tag push.
 # Set GitHub repo secrets: DOCKERHUB_USERNAME, DOCKERHUB_TOKEN.
 #
 # Postgres (expects external DB): <user>/id:<version> and :latest
@@ -8,8 +8,9 @@
 name: Docker Publish
 
 on:
-  release:
-    types: [ published ]
+  push:
+    tags:
+      - "v*"
 
 jobs:
   build-and-push:
@@ -21,8 +22,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
-        with:
-          ref: ${{ github.event.release.tag_name }}
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -36,11 +35,9 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Set version from release tag
+      - name: Extract version from tag
         id: version
         run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
-        env:
-          GITHUB_REF: refs/tags/${{ github.event.release.tag_name }}
 
       - name: Build and push (Postgres)
         uses: docker/build-push-action@v6
