@@ -1,3 +1,11 @@
+## [1.0.7](https://github.com/byingtondesign/id/compare/v1.0.6...v1.0.7) (2026-02-28)
+
+
+### Bug Fixes
+
+* force build ([3a501d5](https://github.com/rickbyington/id/commit/3a501d5736e6c102f40815b863729b391634b774))
+
+## [1.0.6](https://github.com/byingtondesign/id/compare/v1.0.5...v1.0.6) (2026-02-28)
 ## [1.0.6](https://github.com/rickbyington/id/compare/v1.0.5...v1.0.6) (2026-02-28)
 
 
