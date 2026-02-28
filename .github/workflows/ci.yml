@@ -64,6 +64,11 @@ jobs:
           RAILS_ENV: test
           DATABASE_URL: postgres://postgres:postgres@localhost:5433
         run: bin/rails db:test:prepare test
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: false
 
   security_brakeman:
     runs-on: ubuntu-latest
@@ -116,3 +121,25 @@ jobs:
 
       - name: Audit JavaScript dependencies for vulnerabilities
         run: bin/importmap audit
+
+  security_grype:
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Run Grype vulnerability scan
+        id: grype
+        uses: anchore/scan-action@v7
+        with:
+          path: "."
+          fail-build: true
+          severity-cutoff: medium
+          output-format: sarif
+
+      - name: Upload Grype SARIF to Code Scanning
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: ${{ steps.grype.outputs.sarif }}

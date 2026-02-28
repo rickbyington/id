@@ -1,5 +1,7 @@
 # id
 
+[![CI](https://github.com/rickbyington/id/actions/workflows/ci.yml/badge.svg)](https://github.com/rickbyington/id/actions/workflows/ci.yml) [![Grype](https://github.com/rickbyington/id/actions/workflows/grype.yml/badge.svg)](https://github.com/rickbyington/id/actions/workflows/grype.yml) [![codecov](https://codecov.io/gh/rickbyington/id/graph/badge.svg)](https://codecov.io/gh/rickbyington/id) [![Ruby](https://img.shields.io/badge/ruby-3.4-red.svg)](https://www.ruby-lang.org/) [![Release](https://img.shields.io/github/v/release/rickbyington/id)](https://github.com/rickbyington/id/releases)
+
 Rails app: OAuth 2.0 / OpenID Connect identity provider (Doorkeeper, Devise).
 
 **Environment variables:** see [ENV.md](ENV.md) for a full list of required and optional ENV vars.
@@ -13,7 +15,7 @@ Use the dev Docker Compose file (app + PostgreSQL):
 ```bash
 cp .env.example .env
 # Set SECRET_KEY_BASE, JWT_SECRET, and OIDC_PRIVATE_KEY
-docker compose -f docker-compose.dev.yml up -d
+docker compose up -d
 ```
 
 Open http://localhost:3000.
@@ -21,8 +23,8 @@ Open http://localhost:3000.
 You can also use the `Makefile` shortcuts:
 
 ```bash
-make build     # docker compose -f docker-compose.dev.yml build
-make up        # docker compose -f docker-compose.dev.yml up -d
+make build     # docker compose build
+make up        # docker compose up -d
 make logs      # follow logs
 make shell     # sh into the app container
 make migrate   # run db:migrate in the container
@@ -65,7 +67,7 @@ Releases are driven by [semantic-release](https://github.com/semantic-release/se
 2. **Push to `main`.** The [Release](.github/workflows/release.yml) workflow runs, analyzes commits, updates `CHANGELOG.md` and `VERSION`, creates a GitHub release and tag (e.g. `v0.2.0`).
 3. **The tag triggers [Docker Publish](.github/workflows/docker-publish.yml)** to build and push `id:<version>` and `id:standalone` to Docker Hub.
 
-No manual tagging or release drafting is required. Replace `your-org/id` in `CHANGELOG.md` links with your GitHub org/repo.
+No manual tagging or release drafting is required.
 
 ## Docker
 
@@ -83,7 +85,7 @@ One container, no external database. **First startup:** if you don’t pass any 
 **Minimal run (no ENV needed for first run):**
 
 ```bash
-docker run -d -p 80:80 -v id_storage:/rails/storage --name id your-org/id:standalone
+docker run -d -p 80:80 -v id_storage:/rails/storage --name id rickbyington/id:standalone
 ```
 
 Open http://localhost:80. Data and the generated secrets file live in the `id_storage` volume. **For outgoing email** set `SMTP_USER_NAME`, `SMTP_PASSWORD`, `SMTP_ADDRESS`, `SMTP_PORT` (see [ENV.md](ENV.md)).
@@ -95,10 +97,10 @@ To provide your own secrets instead of auto-generation, pass `SECRET_KEY_BASE`, 
 Run the app and a PostgreSQL database with one command:
 
 1. Copy `.env.example` to `.env` and set `SECRET_KEY_BASE`, `JWT_SECRET` (and optionally OIDC key, DB passwords).
-2. `docker compose -f docker-compose.dev.yml up -d`
+2. `docker compose up -d`
 3. Open http://localhost:3000
 
-The app runs migrations on first boot. Data is stored in a named volume `postgres_data`. To use the published image instead of building locally, set `image: your-org/id:latest` in `docker-compose.dev.yml` (and remove `build: .`).
+The app runs migrations on first boot. Data is stored in a named volume `postgres_data`. To use the published image instead of building locally, set `image: rickbyington/id:latest` in `docker-compose.yml` (and remove `build: .`).
 
 ### Building locally
 
@@ -113,6 +115,7 @@ The workflow `.github/workflows/docker-publish.yml` runs when a version tag (e.g
 
 1. Add repo secrets: `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN` (Docker Hub → Account Settings → Security → New Access Token).
 2. Add repo secret **`GH_TOKEN`**: a GitHub Personal Access Token with `repo` scope (Settings → Developer settings → Personal access tokens). The Release workflow uses it to push the version tag so that the tag push triggers Docker Publish. Without `GH_TOKEN`, releases still run but Docker images are not built.
-3. Run `bundle install` once so `Gemfile.lock` includes the `sqlite3` gem (required for the standalone image build).
-4. Push to `main` (with conventional commits); after CI passes, Release runs and pushes a tag, which triggers the Docker workflow. Or push a tag manually: `git tag v0.1.0 && git push origin v0.1.0`.
-5. The workflow builds and pushes both images: `id:<version>` and `id:latest` (Postgres), `id:<version>-standalone` and `id:standalone` (SQLite).
+3. **(Optional)** Add repo secret **`CODECOV_TOKEN`**: sign up at [codecov.io](https://codecov.io) (free for public repos), add this repo, then paste the token so CI can upload coverage. Without it, the coverage upload step is skipped and the Codecov badge will show "unknown".
+4. Run `bundle install` once so `Gemfile.lock` includes the `sqlite3` gem (required for the standalone image build).
+5. Push to `main` (with conventional commits); after CI passes, Release runs and pushes a tag, which triggers the Docker workflow. Or push a tag manually: `git tag v0.1.0 && git push origin v0.1.0`.
+6. The workflow builds and pushes both images: `id:<version>` and `id:latest` (Postgres), `id:<version>-standalone` and `id:standalone` (SQLite).

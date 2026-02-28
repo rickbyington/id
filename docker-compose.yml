@@ -1,7 +1,7 @@
 # Standalone: app + PostgreSQL for local development.
 #
 # 1. Copy .env.example to .env and set SECRET_KEY_BASE, JWT_SECRET (and optionally OIDC key, POSTGRES_PASSWORD).
-# 2. docker compose -f docker-compose.dev.yml up -d
+# 2. docker compose up -d
 # 3. Open http://localhost:3000
 #
 # Or use the published image: image: your-dockerhub-org/id:latest
@@ -63,4 +63,3 @@ services:
 
 volumes:
   postgres_data:
-

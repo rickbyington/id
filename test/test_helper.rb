@@ -1,6 +1,11 @@
 # frozen_string_literal: true
 
 ENV["RAILS_ENV"] ||= "test"
+require "simplecov"
+SimpleCov.start "rails" do
+  add_filter "/vendor/"
+  add_filter "/test/"
+end
 require_relative "../config/environment"
 require "rails/test_help"
 require "devise/test/integration_helpers"

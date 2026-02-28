@@ -5,7 +5,7 @@
 # Ensure .env exists with SECRET_KEY_BASE, JWT_SECRET (copy from .env.example).
 # Inline recipes (;) so no TAB character is required—safe with any editor.
 
-COMPOSE := docker compose -f docker-compose.dev.yml
+COMPOSE := docker compose
 SERVICE := app
 PORT    := 3000
 

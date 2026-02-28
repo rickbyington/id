@@ -69,6 +69,8 @@ group :test do
   # Use system testing [https://guides.rubyonrails.org/testing.html#system-testing]
   gem "capybara"
   gem "selenium-webdriver"
+  # Coverage for CI (upload to Codecov; free for public repos)
+  gem "simplecov", require: false
 end
 
 gem "devise", "~> 4.9"
