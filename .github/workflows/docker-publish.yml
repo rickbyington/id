@@ -4,6 +4,8 @@
 #
 # Postgres (expects external DB): <user>/id:<version> and :latest
 # Standalone SQLite (pull and run): <user>/id:<version>-standalone and :standalone
+#
+# Images are scanned with Grype before push; push is skipped if critical/high vulns are found.
 
 name: Docker Publish
 
@@ -13,7 +15,7 @@ on:
       - "v*"
 
 jobs:
-  build-and-push:
+  build-scan-push:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -39,25 +41,53 @@ jobs:
         id: version
         run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
 
-      - name: Build and push (Postgres)
+      - name: Build Postgres image (no push)
+        id: build-postgres
         uses: docker/build-push-action@v6
         with:
           context: .
-          push: true
+          push: false
+          load: true
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/id:${{ steps.version.outputs.VERSION }}
             ${{ secrets.DOCKERHUB_USERNAME }}/id:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Build and push (standalone SQLite)
+      - name: Scan Postgres image (Grype)
+        uses: anchore/scan-action@v7
+        with:
+          image: ${{ secrets.DOCKERHUB_USERNAME }}/id:${{ steps.version.outputs.VERSION }}
+          fail-build: true
+          severity-cutoff: high
+
+      - name: Push Postgres image
+        run: |
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/id:${{ steps.version.outputs.VERSION }}
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/id:latest
+
+      - name: Build standalone image (no push)
+        id: build-standalone
         uses: docker/build-push-action@v6
         with:
           context: .
           target: standalone
-          push: true
+          push: false
+          load: true
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/id:${{ steps.version.outputs.VERSION }}-standalone
             ${{ secrets.DOCKERHUB_USERNAME }}/id:standalone
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: Scan standalone image (Grype)
+        uses: anchore/scan-action@v7
+        with:
+          image: ${{ secrets.DOCKERHUB_USERNAME }}/id:${{ steps.version.outputs.VERSION }}-standalone
+          fail-build: true
+          severity-cutoff: high
+
+      - name: Push standalone image
+        run: |
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/id:${{ steps.version.outputs.VERSION }}-standalone
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/id:standalone

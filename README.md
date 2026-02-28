@@ -1,6 +1,6 @@
 # id
 
-[![CI](https://github.com/rickbyington/id/actions/workflows/ci.yml/badge.svg)](https://github.com/rickbyington/id/actions/workflows/ci.yml) [![Grype](https://github.com/rickbyington/id/actions/workflows/grype.yml/badge.svg)](https://github.com/rickbyington/id/actions/workflows/grype.yml) [![codecov](https://codecov.io/gh/rickbyington/id/graph/badge.svg)](https://codecov.io/gh/rickbyington/id) [![Ruby](https://img.shields.io/badge/ruby-3.4-red.svg)](https://www.ruby-lang.org/) [![Release](https://img.shields.io/github/v/release/rickbyington/id)](https://github.com/rickbyington/id/releases)
+[![CI](https://github.com/rickbyington/id/actions/workflows/ci.yml/badge.svg)](https://github.com/rickbyington/id/actions/workflows/ci.yml) [![CodeQL](https://github.com/rickbyington/id/actions/workflows/codeql.yml/badge.svg)](https://github.com/rickbyington/id/actions/workflows/codeql.yml) [![Security](https://img.shields.io/badge/security-code%20scanning-blue)](https://github.com/rickbyington/id/security) [![codecov](https://codecov.io/gh/rickbyington/id/graph/badge.svg)](https://codecov.io/gh/rickbyington/id) [![Ruby](https://img.shields.io/badge/ruby-3.4-red.svg)](https://www.ruby-lang.org/) [![Release](https://img.shields.io/github/v/release/rickbyington/id)](https://github.com/rickbyington/id/releases)
 
 Rails app: OAuth 2.0 / OpenID Connect identity provider (Doorkeeper, Devise).
 
@@ -51,6 +51,10 @@ Run the same CI workflow as GitHub (lint, test, Brakeman, audits) using [act](ht
 ```bash
 make ci
 ```
+
+## Testing
+
+Unit and integration tests use Minitest. Coverage is reported by SimpleCov (see `/coverage` after `bin/rails test`). CI enforces a **90% minimum coverage**; aim for near 100% when adding features. Tests cover models (User, Permission, PhoneOtpCode), helpers, services (SmsService), phone OTP flows, OAuth, password/phone changes, admin, and health.
 
 ## Versioning
 

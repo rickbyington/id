@@ -5,6 +5,8 @@ require "simplecov"
 SimpleCov.start "rails" do
   add_filter "/vendor/"
   add_filter "/test/"
+  minimum_coverage 90
+  maximum_coverage_drop 0
 end
 require_relative "../config/environment"
 require "rails/test_help"

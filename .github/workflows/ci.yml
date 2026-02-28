@@ -1,10 +1,14 @@
 name: CI
 
-# Fails if: RuboCop lint fails, unit tests fail, Brakeman finds issues, or gem security audit finds vulnerabilities.
+# Fails if: RuboCop lint fails, unit tests fail, Brakeman/Grype/gem/JS audits find issues.
 on:
   pull_request:
   push:
     branches: [ main ]
+
+# Least privilege: only jobs that need write (e.g. SARIF upload) request it.
+permissions:
+  contents: read
 
 jobs:
   lint:
@@ -85,6 +89,28 @@ jobs:
       - name: Brakeman (fail on any finding)
         run: bin/brakeman --no-pager --exit-on-warn --exit-on-error
 
+  security_grype:
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Run Grype vulnerability scan
+        id: grype
+        uses: anchore/scan-action@v7
+        with:
+          path: "."
+          fail-build: true
+          severity-cutoff: medium
+          output-format: sarif
+
+      - name: Upload Grype SARIF to Code Scanning
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: ${{ steps.grype.outputs.sarif }}
+
   security_gems:
     runs-on: ubuntu-latest
     steps:
@@ -121,25 +147,3 @@ jobs:
 
       - name: Audit JavaScript dependencies for vulnerabilities
         run: bin/importmap audit
-
-  security_grype:
-    runs-on: ubuntu-latest
-    permissions:
-      security-events: write
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-
-      - name: Run Grype vulnerability scan
-        id: grype
-        uses: anchore/scan-action@v7
-        with:
-          path: "."
-          fail-build: true
-          severity-cutoff: medium
-          output-format: sarif
-
-      - name: Upload Grype SARIF to Code Scanning
-        uses: github/codeql-action/upload-sarif@v4
-        with:
-          sarif_file: ${{ steps.grype.outputs.sarif }}

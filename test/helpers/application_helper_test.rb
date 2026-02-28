@@ -73,6 +73,58 @@ class ApplicationHelperTest < ActionView::TestCase
     assert_equal %w[ email ], default_login_methods
   end
 
+  # --- signalwire_configured? ---
+
+  test "signalwire_configured? returns false when no ENV vars are set" do
+    clear_signalwire_env
+    assert_equal false, signalwire_configured?
+  end
+
+  test "signalwire_configured? returns true when all four ENV vars are set" do
+    ENV["SIGNALWIRE_PROJECT_ID"]   = "pid"
+    ENV["SIGNALWIRE_API_TOKEN"]    = "tok"
+    ENV["SIGNALWIRE_SPACE_URL"]     = "space.signalwire.com"
+    ENV["SIGNALWIRE_FROM_NUMBER"]  = "+15551234567"
+    assert_equal true, signalwire_configured?
+  end
+
+  test "signalwire_configured? returns false when only some ENV vars are set" do
+    ENV["SIGNALWIRE_PROJECT_ID"]  = "pid"
+    ENV["SIGNALWIRE_API_TOKEN"]   = "tok"
+    ENV["SIGNALWIRE_SPACE_URL"]    = nil
+    ENV["SIGNALWIRE_FROM_NUMBER"] = nil
+    assert_equal false, signalwire_configured?
+  end
+
+  # --- login_methods_for_pending_oauth_client ---
+
+  test "login_methods_for_pending_oauth_client returns [] when session return_to is blank" do
+    assert_equal [], login_methods_for_pending_oauth_client
+  end
+
+  test "login_methods_for_pending_oauth_client returns app login_methods when session has oauth authorize URL with client_id" do
+    app = Doorkeeper::Application.create!(
+      name: "OAuth App",
+      redirect_uri: "https://app.com/callback",
+      scopes: "openid",
+      uid: SecureRandom.hex(8),
+      secret: SecureRandom.hex(16),
+      login_methods: "email,google"
+    )
+    @controller.session[:user_return_to] = "http://example.com/oauth/authorize?client_id=#{app.uid}&redirect_uri=https%3A%2F%2Fapp.com%2Fcallback"
+    assert_equal %w[ email google ], login_methods_for_pending_oauth_client
+  end
+
+  test "login_methods_for_pending_oauth_client returns [] when client_id does not match an app" do
+    @controller.session[:user_return_to] = "http://example.com/oauth/authorize?client_id=nonexistent"
+    assert_equal [], login_methods_for_pending_oauth_client
+  end
+
+  test "login_methods_for_pending_oauth_client returns [] for invalid URI in return_to" do
+    @controller.session[:user_return_to] = "not-a-valid-uri://"
+    assert_equal [], login_methods_for_pending_oauth_client
+  end
+
   # --- mailbox_available? ---
 
   test "mailbox_available? returns true when delivery method is test" do
