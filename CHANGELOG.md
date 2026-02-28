@@ -1,3 +1,10 @@
+## [1.0.2](https://github.com/byingtondesign/id/compare/v1.0.1...v1.0.2) (2026-02-28)
+
+
+### Bug Fixes
+
+* cleanup and local ci ([897b4f6](https://github.com/byingtondesign/id/commit/897b4f6e989893b7c239c7544fd0c25dbba5f06d))
+
 ## [1.0.1](https://github.com/byingtondesign/id/compare/v1.0.0...v1.0.1) (2026-02-28)
 
 
