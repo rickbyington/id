@@ -16,7 +16,7 @@ class UsersSessionsTest < ActionDispatch::IntegrationTest
     with_env("DEFAULT_LOGIN_METHODS" => nil) do
       get new_user_session_path
       assert_response :ok
-      assert response.body.include?("Log in")
+      assert response.body.include?("Sign in")
     end
   end
 
@@ -61,7 +61,7 @@ class UsersSessionsTest < ActionDispatch::IntegrationTest
       assert_response :redirect
       follow_redirect!
       assert_response :ok
-      assert response.body.include?("Log in")
+      assert response.body.include?("Sign in")
     end
   end
 
@@ -76,7 +76,7 @@ class UsersSessionsTest < ActionDispatch::IntegrationTest
       assert_response :redirect
       follow_redirect!
       assert_response :ok
-      assert response.body.include?("Log in")
+      assert response.body.include?("Sign in")
     end
   end
 end

@@ -42,6 +42,14 @@ bin/rails db:prepare
 bin/rails server
 ```
 
+## Running CI locally
+
+Run the same CI workflow as GitHub (lint, test, Brakeman, audits) using [act](https://github.com/nektos/act) in Docker:
+
+```bash
+make ci
+```
+
 ## Versioning
 
 This project uses [Semantic Versioning](https://semver.org/). The version is in `VERSION` and shown in the app footer.

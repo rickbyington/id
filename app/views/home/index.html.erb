@@ -60,7 +60,7 @@
         <% if current_user.admin? %>
           <%= link_to "Admin", admin_root_path, class: "btn btn-outline-secondary btn-lg w-100 mb-2" %>
         <% end %>
-        <% if current_user.admin? && test_mailbox_available? %>
+        <% if current_user.admin? && mailbox_available? %>
           <%= link_to "Mailbox", mailbox_path, class: "btn btn-outline-secondary btn-lg w-100 mb-2" %>
         <% end %>
 

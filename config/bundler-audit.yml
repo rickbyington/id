@@ -1,5 +1,5 @@
 # Audit all gems listed in the Gemfile for known security problems by running bin/bundler-audit.
-# CVEs that are not relevant to the application can be enumerated on the ignore list below.
+# If CI job security_gems fails, run: bin/bundler-audit check
+# Then add the reported CVE or advisory ID to the ignore list below if you accept the risk.
 
-ignore:
-  - CVE-THAT-DOES-NOT-APPLY
+ignore: []

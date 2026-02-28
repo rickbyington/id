@@ -2,7 +2,7 @@
 
 module Admin
   class UserPermissionsController < BaseController
-    before_action :set_user_permission, only: %i[show destroy]
+    before_action :set_user_permission, only: %i[ show destroy ]
 
     def index
       @user_permissions = UserPermission.includes(:user, :permission).order(created_at: :desc)

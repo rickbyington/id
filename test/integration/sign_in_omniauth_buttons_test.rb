@@ -3,7 +3,7 @@
 require "test_helper"
 
 class SignInOmniAuthButtonsTest < ActionDispatch::IntegrationTest
-  ENV_KEYS = %w[DEFAULT_LOGIN_METHODS GOOGLE_CLIENT_ID GOOGLE_CLIENT_SECRET GITHUB_CLIENT_ID GITHUB_CLIENT_SECRET].freeze
+  ENV_KEYS = %w[ DEFAULT_LOGIN_METHODS GOOGLE_CLIENT_ID GOOGLE_CLIENT_SECRET GITHUB_CLIENT_ID GITHUB_CLIENT_SECRET ].freeze
 
   def with_env(env_overrides)
     old = ENV_KEYS.to_h { |k| [ k, ENV[k] ] }

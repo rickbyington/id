@@ -11,9 +11,16 @@ Doorkeeper::OpenidConnect.configure do
 
   # RSA private key for signing OIDC ID tokens. Set OIDC_PRIVATE_KEY in ENV (PEM string; newlines as \n).
   # Generate: openssl genrsa 2048 (output PEM, then put in .env with newlines as \n)
+  # In test/development, a key is generated if OIDC_PRIVATE_KEY is not set (so CI and local dev work without secrets).
   signing_key_value = ENV["OIDC_PRIVATE_KEY"].to_s.presence
   signing_key_value = signing_key_value.gsub("\\n", "\n") if signing_key_value
-  raise "Set OIDC_PRIVATE_KEY in ENV (PEM string)" unless signing_key_value.presence
+  if signing_key_value.blank?
+    if Rails.env.test? || Rails.env.development?
+      signing_key_value = OpenSSL::PKey::RSA.new(2048).to_pem
+    else
+      raise "Set OIDC_PRIVATE_KEY in ENV (PEM string)"
+    end
+  end
   signing_key signing_key_value
 
   subject_types_supported [ :public ]
@@ -49,8 +56,8 @@ Doorkeeper::OpenidConnect.configure do
     # redirect_to(account_select_url)
   end
 
-   # Subject identifier - unique identifier for the user (nil for client_credentials grant)
-   subject do |resource_owner, application|
+  # Subject identifier - unique identifier for the user (nil for client_credentials grant)
+  subject do |resource_owner, application|
     resource_owner ? resource_owner.id.to_s : "client_#{application.uid}"
   end
 
@@ -69,29 +76,24 @@ Doorkeeper::OpenidConnect.configure do
   #     resource_owner.foo
   #   end
   claims do
-    normal_claim :email, scope: :email, response: %i[id_token user_info] do |resource_owner|
+    normal_claim :email, scope: :email, response: %i[ id_token user_info ] do |resource_owner|
       resource_owner.email
     end
 
-    normal_claim :name, scope: :profile, response: %i[id_token user_info] do |resource_owner|
+    normal_claim :name, scope: :profile, response: %i[ id_token user_info ] do |resource_owner|
       [ resource_owner.first_name, resource_owner.last_name ].compact.join(" ").presence
     end
 
-    normal_claim :given_name, scope: :profile, response: %i[id_token user_info] do |resource_owner|
+    normal_claim :given_name, scope: :profile, response: %i[ id_token user_info ] do |resource_owner|
       resource_owner.first_name
     end
 
-    normal_claim :family_name, scope: :profile, response: %i[id_token user_info] do |resource_owner|
+    normal_claim :family_name, scope: :profile, response: %i[ id_token user_info ] do |resource_owner|
       resource_owner.last_name
     end
 
-    normal_claim :permissions, response: %i[id_token user_info] do |resource_owner|
+    normal_claim :permissions, response: %i[ id_token user_info ] do |resource_owner|
       resource_owner.permissions.map { |p| { name: p.name, value: p.value } }
     end
   end
-
-  #   normal_claim :_bar_ do |resource_owner|
-  #     resource_owner.bar
-  #   end
-  # end
 end

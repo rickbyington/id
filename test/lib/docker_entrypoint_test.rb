@@ -26,23 +26,24 @@ class DockerEntrypointTest < ActiveSupport::TestCase
   test "check_storage_mount! creates storage dir when missing" do
     env = {}
     refute File.directory?(@storage_dir)
-    assert_equal :ok, DockerEntrypoint.check_storage_mount!(@storage_dir, env: env)
+    # Use nonexistent mountinfo path so mount check is skipped (e.g. on Linux in CI)
+    assert_equal :ok, DockerEntrypoint.check_storage_mount!(@storage_dir, env: env, mountinfo_path: "/nonexistent/mountinfo")
     assert File.directory?(@storage_dir)
   end
 
   test "check_storage_mount! returns :ok when dir exists and is writable and no mountinfo" do
     FileUtils.mkdir_p(@storage_dir)
     env = {}
-    # On macOS /proc/self/mountinfo does not exist, so we skip mount check
-    assert_equal :ok, DockerEntrypoint.check_storage_mount!(@storage_dir, env: env)
+    assert_equal :ok, DockerEntrypoint.check_storage_mount!(@storage_dir, env: env, mountinfo_path: "/nonexistent/mountinfo")
   end
 
   test "check_storage_mount! raises when dir is not writable" do
     FileUtils.mkdir_p(@storage_dir)
     FileUtils.chmod(0o444, @storage_dir)
+    skip "Process can write to read-only dir (e.g. root in CI)" if File.writable?(@storage_dir)
     env = {}
     err = assert_raises(DockerEntrypoint::StorageCheckError) do
-      DockerEntrypoint.check_storage_mount!(@storage_dir, env: env)
+      DockerEntrypoint.check_storage_mount!(@storage_dir, env: env, mountinfo_path: "/nonexistent/mountinfo")
     end
     assert_match(/not writable/, err.message)
   ensure
@@ -52,31 +53,21 @@ class DockerEntrypointTest < ActiveSupport::TestCase
   test "check_storage_mount! raises when mountinfo exists and dir is not mounted" do
     FileUtils.mkdir_p(@storage_dir)
     env = {}
-    mountinfo_content = "1 2 3 4 /other 5 6 7 8 9 10\n"
-    real_exist = File.method(:exist?)
-    real_read = File.method(:read)
-    File.stub(:exist?, ->(path) { path == "/proc/self/mountinfo" ? true : real_exist.call(path) }) do
-      File.stub(:read, ->(path) { path == "/proc/self/mountinfo" ? mountinfo_content : real_read.call(path) }) do
-        err = assert_raises(DockerEntrypoint::StorageCheckError) do
-          DockerEntrypoint.check_storage_mount!(@storage_dir, env: env)
-        end
-        assert_match(/not a mounted volume/, err.message)
-        assert_match(/docker run -v/, err.message)
-      end
+    mountinfo_file = File.join(@tmpdir, "mountinfo")
+    File.write(mountinfo_file, "1 2 3 4 /other 5 6 7 8 9 10\n")
+    err = assert_raises(DockerEntrypoint::StorageCheckError) do
+      DockerEntrypoint.check_storage_mount!(@storage_dir, env: env, mountinfo_path: mountinfo_file)
     end
+    assert_match(/not a mounted volume/, err.message)
+    assert_match(/docker run -v/, err.message)
   end
 
   test "check_storage_mount! returns :ok when mountinfo exists and dir is mounted" do
     FileUtils.mkdir_p(@storage_dir)
     env = {}
-    mountinfo_content = "1 2 3 4 #{@storage_dir} 5 6 7 8 9 10\n"
-    real_exist = File.method(:exist?)
-    real_read = File.method(:read)
-    File.stub(:exist?, ->(path) { path == "/proc/self/mountinfo" ? true : real_exist.call(path) }) do
-      File.stub(:read, ->(path) { path == "/proc/self/mountinfo" ? mountinfo_content : real_read.call(path) }) do
-        assert_equal :ok, DockerEntrypoint.check_storage_mount!(@storage_dir, env: env)
-      end
-    end
+    mountinfo_file = File.join(@tmpdir, "mountinfo")
+    File.write(mountinfo_file, "1 2 3 4 #{@storage_dir} 5 6 7 8 9 10\n")
+    assert_equal :ok, DockerEntrypoint.check_storage_mount!(@storage_dir, env: env, mountinfo_path: mountinfo_file)
   end
 
   # --- ensure_secrets_file! ---
@@ -146,17 +137,17 @@ class DockerEntrypointTest < ActiveSupport::TestCase
   # --- run_server_setup? ---
 
   test "run_server_setup? returns true when argv ends with rails and server" do
-    assert DockerEntrypoint.run_server_setup?(["/path/bin/rails", "server"])
-    assert DockerEntrypoint.run_server_setup?(["/path/to/rails", "server"])
+    assert DockerEntrypoint.run_server_setup?([ "/path/bin/rails", "server" ])
+    assert DockerEntrypoint.run_server_setup?([ "/path/to/rails", "server" ])
   end
 
   test "run_server_setup? returns false when argv does not end with server" do
-    refute DockerEntrypoint.run_server_setup?(["/path/bin/rails", "console"])
-    refute DockerEntrypoint.run_server_setup?(["/path/bin/rails"])
+    refute DockerEntrypoint.run_server_setup?([ "/path/bin/rails", "console" ])
+    refute DockerEntrypoint.run_server_setup?([ "/path/bin/rails" ])
   end
 
   test "run_server_setup? returns false when second to last is not rails" do
-    refute DockerEntrypoint.run_server_setup?(["/path/bin/rake", "server"])
+    refute DockerEntrypoint.run_server_setup?([ "/path/bin/rake", "server" ])
   end
 
   test "run_server_setup? returns false for empty argv" do
@@ -164,6 +155,6 @@ class DockerEntrypointTest < ActiveSupport::TestCase
   end
 
   test "run_server_setup? returns false for single element" do
-    refute DockerEntrypoint.run_server_setup?(["rails"])
+    refute DockerEntrypoint.run_server_setup?([ "rails" ])
   end
 end

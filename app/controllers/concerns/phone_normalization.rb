@@ -16,4 +16,3 @@ module PhoneNormalization
     phone.match?(/\A\+[1-9]\d{7,14}\z/)
   end
 end
-

@@ -12,7 +12,8 @@ module DockerEntrypoint
 
   # Check that storage dir exists, is writable, and (on Linux) is a mount point.
   # Returns :ok or raises StorageCheckError with message. Set env["REQUIRE_STORAGE_MOUNT"] = "0" to skip.
-  def self.check_storage_mount!(storage_dir, env: ENV)
+  # mountinfo_path: optional path to mountinfo file (for tests); default /proc/self/mountinfo when present.
+  def self.check_storage_mount!(storage_dir, env: ENV, mountinfo_path: "/proc/self/mountinfo")
     return :ok if env["REQUIRE_STORAGE_MOUNT"] == "0"
 
     FileUtils.mkdir_p(storage_dir) unless File.directory?(storage_dir)
@@ -20,9 +21,9 @@ module DockerEntrypoint
       raise StorageCheckError, "#{storage_dir} is not writable. Fix permissions or run with -v."
     end
 
-    return :ok unless File.exist?("/proc/self/mountinfo")
+    return :ok unless File.exist?(mountinfo_path)
 
-    mounted = File.read("/proc/self/mountinfo").lines.any? do |line|
+    mounted = File.read(mountinfo_path).lines.any? do |line|
       fields = line.split
       fields[4] == storage_dir  # 5th field is mount point per mountinfo(5)
     end

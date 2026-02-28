@@ -9,7 +9,7 @@ COMPOSE := docker compose -f docker-compose.dev.yml
 SERVICE := app
 PORT    := 3000
 
-.PHONY: build up down run run-bg stop logs shell migrate console clean clean-data
+.PHONY: build up down run run-bg stop logs shell migrate console clean clean-data ci
 
 build: ; $(COMPOSE) build
 
@@ -34,3 +34,13 @@ console: ; $(COMPOSE) exec $(SERVICE) bin/rails console
 clean: down
 
 clean-data: down ; $(COMPOSE) down -v ; echo "Stopped and removed volumes"
+
+# Run the GitHub Actions CI workflow locally via [act](https://github.com/nektos/act) in Docker.
+# Uses the same workflow file as GitHub; no act install required on the host.
+ci:
+	docker run --rm -it \
+	  -v "$(CURDIR):/workspace" \
+	  -v /var/run/docker.sock:/var/run/docker.sock \
+	  -w /workspace \
+	  -e DOCKER_HOST=unix:///var/run/docker.sock \
+	  efrecon/act:v0.2.84 push -W .github/workflows/ci.yml -P ubuntu-latest=catthehacker/ubuntu:act-latest

@@ -122,5 +122,4 @@ class Users::PhoneRegistrationsController < ApplicationController
       redirect_to new_phone_registration_path
     end
   end
-
 end

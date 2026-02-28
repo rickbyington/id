@@ -92,5 +92,5 @@ Rails.application.configure do
 
   # Allow web console from any IP in development (Docker, host, tunnels).
   # Production does not load web-console, so this is dev-only.
-  config.web_console.permissions = %w[0.0.0.0/0 ::/0]
+  config.web_console.permissions = %w[ 0.0.0.0/0 ::/0 ]
 end

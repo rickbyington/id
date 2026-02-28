@@ -2,7 +2,7 @@
 
 module Admin
   class UsersController < BaseController
-    before_action :set_user, only: %i[show edit update destroy]
+    before_action :set_user, only: %i[ show edit update destroy ]
 
     def index
       @users = User.order(:email)
@@ -47,7 +47,7 @@ module Admin
     end
 
     def user_params
-      list = %i[email first_name last_name admin]
+      list = %i[ email first_name last_name admin ]
       list << :password << :password_confirmation if params[:user][:password].present?
       params.require(:user).permit(list)
     end

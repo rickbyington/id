@@ -100,5 +100,4 @@ class Users::PhoneChangesController < ApplicationController
       redirect_to new_user_phone_change_path, alert: "Please enter your new phone number first."
     end
   end
-
 end

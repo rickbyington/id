@@ -17,13 +17,13 @@ class SmsService
 
   def self.send_otp(to:, code:, purpose: "verification")
     body = case purpose
-           when "confirmation"
-             "Your sign-up verification code is #{code}. It expires in 10 minutes."
-           when "sign_in"
-             "Your sign-in code is #{code}. It expires in 10 minutes."
-           else
-             "Your verification code is #{code}. It expires in 10 minutes."
-           end
+    when "confirmation"
+      "Your sign-up verification code is #{code}. It expires in 10 minutes."
+    when "sign_in"
+      "Your sign-in code is #{code}. It expires in 10 minutes."
+    else
+      "Your verification code is #{code}. It expires in 10 minutes."
+    end
 
     new.send_message(to: to, body: body)
   end

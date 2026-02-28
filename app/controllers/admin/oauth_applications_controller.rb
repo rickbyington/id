@@ -3,10 +3,10 @@
 module Admin
   class OauthApplicationsController < BaseController
     # Optional scopes only; openid is always included when saving (required for OIDC)
-    AVAILABLE_SCOPES = (defined?(DOORKEEPER_OPTIONAL_SCOPES) ? DOORKEEPER_OPTIONAL_SCOPES : %w[profile email]).freeze
+    AVAILABLE_SCOPES = (defined?(DOORKEEPER_OPTIONAL_SCOPES) ? DOORKEEPER_OPTIONAL_SCOPES : %w[ profile email ]).freeze
 
-    before_action :set_application, only: %i[show edit update destroy]
-    before_action :set_available_scopes, only: %i[new create edit update]
+    before_action :set_application, only: %i[ show edit update destroy ]
+    before_action :set_available_scopes, only: %i[ new create edit update ]
 
     def index
       @oauth_applications = Doorkeeper::Application.order(created_at: :desc)

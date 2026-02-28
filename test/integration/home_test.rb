@@ -11,7 +11,8 @@ class HomeTest < ActionDispatch::IntegrationTest
 
   test "GET / when signed in returns success and shows welcome" do
     user = User.create!(email: "welcome@example.com", password: "password123")
-    sign_in_via_form(user)
+    user.confirm
+    sign_in user
     get root_path
     assert_response :ok
     assert response.body.include?("Welcome")
@@ -20,6 +21,7 @@ class HomeTest < ActionDispatch::IntegrationTest
 
   test "GET / when signed in with authorized applications shows app and revoke button" do
     user = User.create!(email: "welcome@example.com", password: "password123")
+    user.confirm
     app = create_oauth_application(name: "My App", redirect_uri: "https://myapp.com/callback")
     Doorkeeper::AccessToken.create!(
       application_id: app.id,
@@ -27,7 +29,7 @@ class HomeTest < ActionDispatch::IntegrationTest
       scopes: "openid profile",
       expires_in: 7200
     )
-    sign_in_via_form(user)
+    sign_in user
     get root_path
     assert_response :ok
     assert response.body.include?("My App")
@@ -46,6 +48,7 @@ class HomeTest < ActionDispatch::IntegrationTest
 
   test "DELETE authorized_applications when signed in with token revokes and redirects with notice" do
     user = User.create!(email: "revoke@example.com", password: "password123")
+    user.confirm
     app = create_oauth_application(name: "Revoke Me", redirect_uri: "https://revoke.com/cb")
     Doorkeeper::AccessToken.create!(
       application_id: app.id,
@@ -53,7 +56,7 @@ class HomeTest < ActionDispatch::IntegrationTest
       scopes: "openid",
       expires_in: 7200
     )
-    sign_in_via_form(user)
+    sign_in user
     delete revoke_authorized_application_path(app.id)
     assert_response :see_other
     follow_redirect!
@@ -63,7 +66,8 @@ class HomeTest < ActionDispatch::IntegrationTest
 
   test "DELETE authorized_applications when application does not exist redirects with alert" do
     user = User.create!(email: "revoke@example.com", password: "password123")
-    sign_in_via_form(user)
+    user.confirm
+    sign_in user
     delete revoke_authorized_application_path(999_999)
     assert_response :redirect
     follow_redirect!
@@ -72,8 +76,9 @@ class HomeTest < ActionDispatch::IntegrationTest
 
   test "DELETE authorized_applications when user has no token redirects with notice" do
     user = User.create!(email: "revoke@example.com", password: "password123")
+    user.confirm
     app = create_oauth_application(name: "Revoke Me", redirect_uri: "https://revoke.com/cb")
-    sign_in_via_form(user)
+    sign_in user
     delete revoke_authorized_application_path(app.id)
     assert_response :redirect
     follow_redirect!

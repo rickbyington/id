@@ -2,7 +2,7 @@
 
 module Admin
   class PermissionsController < BaseController
-    before_action :set_permission, only: %i[show edit update destroy]
+    before_action :set_permission, only: %i[ show edit update destroy ]
 
     def index
       @permissions = Permission.order(:name, :value)

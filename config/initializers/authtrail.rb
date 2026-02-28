@@ -12,5 +12,5 @@
 # The gem expects this constant but doesn't ship a model; we provide it and require it here
 # so it's available when the Warden callback runs on sign_in.
 Rails.application.config.after_initialize do
-  require Rails.root.join("app/models/authtrail/login_activity.rb").to_s
+  require Rails.root.join("app/models/auth_trail/login_activity.rb").to_s
 end

@@ -48,28 +48,35 @@ class ApplicationHelperTest < ActionView::TestCase
   # --- default_login_methods ---
 
   test "default_login_methods returns only email when env is not set" do
-    ENV.delete("DEFAULT_LOGIN_METHODS")
-    assert_equal %w[email], default_login_methods
+    clear_login_methods_env
+    assert_equal %w[ email ], default_login_methods
   end
 
   test "default_login_methods returns only email when env is blank" do
     ENV["DEFAULT_LOGIN_METHODS"] = "   "
-    assert_equal %w[email], default_login_methods
+    clear_signalwire_env
+    assert_equal %w[ email ], default_login_methods
   end
 
   test "default_login_methods parses comma-separated methods" do
     ENV["DEFAULT_LOGIN_METHODS"] = "email,google,github"
-    assert_equal %w[email google github], default_login_methods
+    assert_equal %w[ email google github ], default_login_methods
   end
 
   test "default_login_methods strips whitespace" do
     ENV["DEFAULT_LOGIN_METHODS"] = " email , google "
-    assert_equal %w[email google], default_login_methods
+    assert_equal %w[ email google ], default_login_methods
   end
 
   test "default_login_methods returns only email when parsed list is empty" do
     ENV["DEFAULT_LOGIN_METHODS"] = ",,"
-    assert_equal %w[email], default_login_methods
+    assert_equal %w[ email ], default_login_methods
+  end
+
+  # --- mailbox_available? ---
+
+  test "mailbox_available? returns true when delivery method is test" do
+    assert mailbox_available?, "delivery_method should be :test in test env"
   end
 
   # --- app_url ---
@@ -104,5 +111,18 @@ class ApplicationHelperTest < ActionView::TestCase
     ENV.delete("GOOGLE_CLIENT_SECRET")
     ENV.delete("GITHUB_CLIENT_ID")
     ENV.delete("GITHUB_CLIENT_SECRET")
+    clear_signalwire_env
+  end
+
+  def clear_login_methods_env
+    ENV.delete("DEFAULT_LOGIN_METHODS")
+    clear_signalwire_env
+  end
+
+  def clear_signalwire_env
+    ENV.delete("SIGNALWIRE_PROJECT_ID")
+    ENV.delete("SIGNALWIRE_API_TOKEN")
+    ENV.delete("SIGNALWIRE_SPACE_URL")
+    ENV.delete("SIGNALWIRE_FROM_NUMBER")
   end
 end

@@ -18,7 +18,7 @@ module ApplicationHelper
   end
 
   # Whether the test mailbox page is available (no SMTP configured).
-  def test_mailbox_available?
+  def mailbox_available?
     ActionMailer::Base.delivery_method == :test
   end
 
@@ -42,10 +42,10 @@ module ApplicationHelper
   def default_login_methods
     raw = ENV["DEFAULT_LOGIN_METHODS"].to_s.strip
     if raw.blank?
-      return signalwire_configured? ? %w[email phone] : %w[email]
+      return signalwire_configured? ? %w[ email phone ] : %w[ email ]
     end
 
-    raw.split(",").map(&:strip).reject(&:blank?).presence || %w[email]
+    raw.split(",").map(&:strip).reject(&:blank?).presence || %w[ email ]
   end
 
   # Login methods allowed for the OAuth client that sent the user here (from stored return URL).
