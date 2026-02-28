@@ -1,3 +1,10 @@
+## [1.0.5](https://github.com/byingtondesign/id/compare/v1.0.4...v1.0.5) (2026-02-28)
+
+
+### Bug Fixes
+
+* updated trigger ([b0e0943](https://github.com/byingtondesign/id/commit/b0e0943a0c2937c2acb623fcfbf05543ae560d0c))
+
 ## [1.0.4](https://github.com/byingtondesign/id/compare/v1.0.3...v1.0.4) (2026-02-28)
 
 
