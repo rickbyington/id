@@ -36,26 +36,55 @@ registry:
   # password:
   #   - KAMAL_REGISTRY_PASSWORD
 
-# Inject ENV variables into containers (secrets come from .kamal/secrets).
+# Inject ENV variables into containers. Secrets come from .kamal/secrets (one KEY=value per line).
+# See ENV.md for descriptions. Required: SECRET_KEY_BASE, JWT_SECRET, OIDC_PRIVATE_KEY; add DB/OAuth/SMS as needed.
 env:
   secret:
-    - RAILS_MASTER_KEY
+    # Required
+    - SECRET_KEY_BASE
+    - JWT_SECRET
+    - OIDC_PRIVATE_KEY
+    # Database (when using PostgreSQL)
+    - DATABASE_PASSWORD
+    # OmniAuth (optional; omit to disable a provider)
+    - GOOGLE_CLIENT_ID
+    - GOOGLE_CLIENT_SECRET
+    - GITHUB_CLIENT_ID
+    - GITHUB_CLIENT_SECRET
+    # SignalWire SMS (required for phone sign-in/sign-up)
+    - SIGNALWIRE_PROJECT_ID
+    - SIGNALWIRE_API_TOKEN
+    - SIGNALWIRE_SPACE_URL
+    - SIGNALWIRE_FROM_NUMBER
+    # Optional: mail, initial admin
+    - SMTP_USER_NAME
+    - SMTP_PASSWORD
+    - ADMIN_EMAIL
+    - ADMIN_PASSWORD
   clear:
-    # Run the Solid Queue Supervisor inside the web server's Puma process to do jobs.
-    # When you start using multiple servers, you should split out job processing to a dedicated machine.
     SOLID_QUEUE_IN_PUMA: true
 
-    # Set number of processes dedicated to Solid Queue (default: 1)
+    # Database (when using PostgreSQL). Omit or use DATABASE_ADAPTER=sqlite3 for SQLite.
+    # DATABASE_ADAPTER: postgresql
+    # DATABASE_HOST: id-db
+    # DATABASE_PORT: "5432"
+    # DATABASE_USERNAME: postgres
+
+    # Login methods shown on sign-in when no OAuth client context: email, phone, google, github
+    # DEFAULT_LOGIN_METHODS: "email,phone"
+
+    # OmniAuth callback base URL when different from request host (e.g. https://id.example.com)
+    # OMNIAUTH_FULL_HOST: https://id.example.com
+
+    # Optional: SMTP (sending email). Add SMTP_USER_NAME, SMTP_PASSWORD to secret above.
+    # SMTP_ADDRESS: smtp.example.com
+    # SMTP_PORT: "587"
+    # ACTION_MAILER_DEFAULT_HOST: id.example.com
+    # ACTION_MAILER_DEFAULT_PROTOCOL: https
+
+    # Optional: concurrency and logging
     # JOB_CONCURRENCY: 3
-
-    # Set number of cores available to the application on each server (default: 1).
     # WEB_CONCURRENCY: 2
-
-    # Match this to any external database server to configure Active Record correctly
-    # Use id-db for a db accessory server on same machine via local kamal docker network.
-    # DB_HOST: 192.168.0.2
-
-    # Log everything from Rails
     # RAILS_LOG_LEVEL: debug
 
 # Aliases are triggered with "bin/kamal <alias>". You can overwrite arguments on invocation:

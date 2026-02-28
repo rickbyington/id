@@ -34,6 +34,20 @@ Rails.application.configure do
   # Don't care if the mailer can't send.
   config.action_mailer.raise_delivery_errors = false
 
+  # Use test mailbox (in-memory) when no SMTP is configured.
+  if ENV["SMTP_ADDRESS"].blank?
+    config.action_mailer.delivery_method = :test
+  else
+    config.action_mailer.delivery_method = :smtp
+    config.action_mailer.smtp_settings = {
+      user_name: ENV["SMTP_USER_NAME"],
+      password: ENV["SMTP_PASSWORD"],
+      address: ENV["SMTP_ADDRESS"],
+      port: (ENV["SMTP_PORT"] || 587).to_i,
+      authentication: :plain
+    }
+  end
+
   # Make template changes take effect immediately.
   config.action_mailer.perform_caching = false
 

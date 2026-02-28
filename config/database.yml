@@ -91,18 +91,23 @@ test:
 #
 production:
   primary: &primary_production
+    adapter: <%= ENV.fetch("DATABASE_ADAPTER", "postgresql") %>
+    <% if ENV["DATABASE_ADAPTER"] == "sqlite3" %>
+    database: <%= Rails.root.join("storage", "production.sqlite3") %>
+    <% else %>
     <<: *default
     database: id_production
-    password: <%= ENV["ID_DATABASE_PASSWORD"] %>
+    password: <%= ENV.fetch("DATABASE_PASSWORD") { "" } %>
+    <% end %>
   cache:
     <<: *primary_production
-    database: id_production_cache
+    database: <%= ENV["DATABASE_ADAPTER"] == "sqlite3" ? Rails.root.join("storage", "production_cache.sqlite3") : "id_production_cache" %>
     migrations_paths: db/cache_migrate
   queue:
     <<: *primary_production
-    database: id_production_queue
+    database: <%= ENV["DATABASE_ADAPTER"] == "sqlite3" ? Rails.root.join("storage", "production_queue.sqlite3") : "id_production_queue" %>
     migrations_paths: db/queue_migrate
   cable:
     <<: *primary_production
-    database: id_production_cable
+    database: <%= ENV["DATABASE_ADAPTER"] == "sqlite3" ? Rails.root.join("storage", "production_cable.sqlite3") : "id_production_cable" %>
     migrations_paths: db/cable_migrate

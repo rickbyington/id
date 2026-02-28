@@ -31,7 +31,8 @@
           </ul>
           <ul class="navbar-nav">
             <% if user_signed_in? %>
-              <li class="nav-item"><span class="nav-link"><%= current_user.email %></span></li>
+              <% profile_label = [current_user.first_name, current_user.last_name].compact.join(" ").presence || current_user.email %>
+              <li class="nav-item"><%= link_to profile_label, root_path, class: "nav-link", title: "Profile" %></li>
               <li class="nav-item"><%= link_to "Sign out", destroy_user_session_path, class: "nav-link", data: { turbo_method: :delete } %></li>
             <% end %>
           </ul>

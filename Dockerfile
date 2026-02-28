@@ -1,77 +1,117 @@
 # syntax=docker/dockerfile:1
 # check=error=true
-
-# This Dockerfile is designed for production, not development. Use with Kamal or build'n'run by hand:
-# docker build -t id .
-# docker run -d -p 80:80 -e RAILS_MASTER_KEY=<value from config/master.key> --name id id
-
-# For a containerized dev environment, see Dev Containers: https://guides.rubyonrails.org/getting_started_with_devcontainer.html
+#
+# Images from one Dockerfile:
+#   Postgres (default):  docker build -t id:latest .
+#   Standalone SQLite:   docker build --target standalone -t id:standalone .
+#   Dev (Postgres):      docker build --target dev -t id:dev .
 
 # Make sure RUBY_VERSION matches the Ruby version in .ruby-version
 ARG RUBY_VERSION=3.4.7
-FROM docker.io/library/ruby:$RUBY_VERSION-slim AS base
+FROM docker.io/library/ruby:$RUBY_VERSION-alpine AS base
 
-# Rails app lives here
 WORKDIR /rails
 
-# Install base packages
-RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y curl libjemalloc2 libvips postgresql-client && \
-    ln -s /usr/lib/$(uname -m)-linux-gnu/libjemalloc.so.2 /usr/local/lib/libjemalloc.so && \
-    rm -rf /var/lib/apt/lists /var/cache/apt/archives
+# Shared base: no DB client yet (added in final stages)
+RUN apk add --no-cache curl jemalloc vips
 
-# Set production environment variables and enable jemalloc for reduced memory usage and latency.
 ENV RAILS_ENV="production" \
     BUNDLE_DEPLOYMENT="1" \
     BUNDLE_PATH="/usr/local/bundle" \
-    BUNDLE_WITHOUT="development" \
-    LD_PRELOAD="/usr/local/lib/libjemalloc.so"
+    LD_PRELOAD="/usr/lib/libjemalloc.so.2"
 
-# Throw-away build stage to reduce size of final image
+# ---- Postgres build ----
 FROM base AS build
 
-# Install packages needed to build gems
-RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y build-essential git libpq-dev libyaml-dev pkg-config && \
-    rm -rf /var/lib/apt/lists /var/cache/apt/archives
+ENV BUNDLE_WITHOUT="development test sqlite"
 
-# Install application gems
+RUN apk add --no-cache build-base git postgresql-dev yaml-dev pkgconfig libxml2-dev libxslt-dev vips-dev
+
 COPY vendor/* ./vendor/
 COPY Gemfile Gemfile.lock ./
 
 RUN bundle install && \
     rm -rf ~/.bundle/ "${BUNDLE_PATH}"/ruby/*/cache "${BUNDLE_PATH}"/ruby/*/bundler/gems/*/.git && \
-    # -j 1 disable parallel compilation to avoid a QEMU bug: https://github.com/rails/bootsnap/issues/495
     bundle exec bootsnap precompile -j 1 --gemfile
 
-# Copy application code
 COPY . .
 
-# Precompile bootsnap code for faster boot times.
-# -j 1 disable parallel compilation to avoid a QEMU bug: https://github.com/rails/bootsnap/issues/495
-RUN bundle exec bootsnap precompile -j 1 app/ lib/
+RUN bundle exec bootsnap precompile -j 1 app/ lib/ && \
+    SECRET_KEY_BASE_DUMMY=1 ./bin/rails assets:precompile
 
-# Precompiling assets for production without requiring secret RAILS_MASTER_KEY
-RUN SECRET_KEY_BASE_DUMMY=1 ./bin/rails assets:precompile
+# ---- Standalone (SQLite) build ----
+FROM base AS build-standalone
 
+ENV BUNDLE_WITHOUT="development test postgres" \
+    DATABASE_ADAPTER="sqlite3" \
+    FIRST_RUN_DEFAULT_SQLITE="1"
 
+RUN apk add --no-cache build-base git sqlite-dev yaml-dev pkgconfig libxml2-dev libxslt-dev vips-dev
 
+COPY vendor/* ./vendor/
+COPY Gemfile Gemfile.lock ./
 
-# Final stage for app image
-FROM base
+RUN bundle install && \
+    rm -rf ~/.bundle/ "${BUNDLE_PATH}"/ruby/*/cache "${BUNDLE_PATH}"/ruby/*/bundler/gems/*/.git && \
+    bundle exec bootsnap precompile -j 1 --gemfile
 
-# Run and own only the runtime files as a non-root user for security
-RUN groupadd --system --gid 1000 rails && \
-    useradd rails --uid 1000 --gid 1000 --create-home --shell /bin/bash
+COPY . .
+
+RUN bundle exec bootsnap precompile -j 1 app/ lib/ && \
+    SECRET_KEY_BASE_DUMMY=1 ./bin/rails assets:precompile
+
+# ---- Final: Standalone SQLite image ----
+FROM base AS standalone
+
+RUN apk add --no-cache sqlite-libs
+
+ENV BUNDLE_WITHOUT="development test postgres" \
+    DATABASE_ADAPTER="sqlite3" \
+    FIRST_RUN_DEFAULT_SQLITE="1"
+
+RUN addgroup -g 1000 -S rails && \
+    adduser -u 1000 -G rails -D -h /home/rails -s /bin/sh rails
 USER 1000:1000
 
-# Copy built artifacts: gems, application
+COPY --chown=rails:rails --from=build-standalone "${BUNDLE_PATH}" "${BUNDLE_PATH}"
+COPY --chown=rails:rails --from=build-standalone /rails /rails
+
+ENTRYPOINT ["/rails/bin/docker-entrypoint"]
+EXPOSE 80
+CMD ["./bin/thrust", "./bin/rails", "server"]
+
+# ---- Final: Dev image (Postgres, development mode) ----
+FROM base AS dev
+
+ENV RAILS_ENV="development" \
+    BUNDLE_WITHOUT="sqlite"
+
+RUN apk add --no-cache build-base git postgresql-dev yaml-dev pkgconfig libxml2-dev libxslt-dev vips-dev
+
+COPY Gemfile Gemfile.lock ./
+RUN bundle install && \
+    rm -rf ~/.bundle/ "${BUNDLE_PATH}"/ruby/*/cache "${BUNDLE_PATH}"/ruby/*/bundler/gems/*/.git
+
+COPY . .
+
+ENTRYPOINT ["/rails/bin/docker-entrypoint"]
+EXPOSE 3000
+CMD ["./bin/rails", "server", "-b", "0.0.0.0", "-p", "3000"]
+
+# ---- Final: Postgres image (default target) ----
+FROM base
+
+RUN apk add --no-cache postgresql-client
+
+ENV BUNDLE_WITHOUT="development test sqlite"
+
+RUN addgroup -g 1000 -S rails && \
+    adduser -u 1000 -G rails -D -h /home/rails -s /bin/sh rails
+USER 1000:1000
+
 COPY --chown=rails:rails --from=build "${BUNDLE_PATH}" "${BUNDLE_PATH}"
 COPY --chown=rails:rails --from=build /rails /rails
 
-# Entrypoint prepares the database.
 ENTRYPOINT ["/rails/bin/docker-entrypoint"]
-
-# Start server via Thruster by default, this can be overwritten at runtime
 EXPOSE 80
 CMD ["./bin/thrust", "./bin/rails", "server"]

@@ -1,0 +1,39 @@
+<div class="row justify-content-center">
+  <div class="col-12 col-sm-10 col-md-6 col-lg-4">
+    <div class="card shadow-sm">
+      <div class="card-body p-4">
+        <%= render "devise/shared/flash" %>
+        <h2 class="card-title h4 mb-4 text-center">Change password</h2>
+
+        <%= form_with model: current_user, url: user_password_change_path, method: :put do |f| %>
+          <%= render "devise/shared/error_messages", resource: current_user %>
+
+          <div class="mb-3">
+            <%= f.label :current_password, class: "form-label" %>
+            <%= f.password_field :current_password, class: "form-control", autocomplete: "current-password", placeholder: "Current password", required: true %>
+          </div>
+
+          <div class="mb-3">
+            <%= f.label :password, "New password", class: "form-label" %>
+            <% if @minimum_password_length %>
+              <span class="form-text">(<%= @minimum_password_length %> characters minimum)</span>
+            <% end %>
+            <%= f.password_field :password, class: "form-control", autocomplete: "new-password", placeholder: "New password", required: true %>
+          </div>
+
+          <div class="mb-4">
+            <%= f.label :password_confirmation, "Confirm new password", class: "form-label" %>
+            <%= f.password_field :password_confirmation, class: "form-control", autocomplete: "new-password", placeholder: "Confirm new password", required: true %>
+          </div>
+
+          <%= f.submit "Update password", class: "btn btn-primary btn-lg w-100 mb-2" %>
+        <% end %>
+
+        <%= link_to edit_user_registration_path, class: "btn btn-outline-secondary w-100" do %>
+          <i class="bi bi-arrow-left me-1"></i>Back to profile
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
+

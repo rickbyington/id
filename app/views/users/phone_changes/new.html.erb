@@ -1,0 +1,26 @@
+<div class="row justify-content-center">
+  <div class="col-12 col-sm-10 col-md-6 col-lg-4">
+    <div class="card shadow-sm">
+      <div class="card-body p-4">
+        <%= render "devise/shared/flash" %>
+        <h2 class="card-title h4 mb-4 text-center"><%= current_user.phone_number.present? ? "Change phone number" : "Add phone number" %></h2>
+
+        <p class="text-muted small mb-4">We'll send a verification code to the new number. You'll need to enter it to confirm.</p>
+
+        <%= form_with url: user_phone_change_path, method: :post do |f| %>
+          <div class="mb-4">
+            <label for="phone" class="form-label">Phone number</label>
+            <%= f.telephone_field :phone, class: "form-control form-control-lg", id: "phone", placeholder: "+15551234567", autocomplete: "tel", autofocus: true, required: true %>
+            <div class="form-text">Enter in international format, e.g. +15551234567</div>
+          </div>
+
+          <%= f.submit "Send verification code", class: "btn btn-primary btn-lg w-100 mb-2" %>
+        <% end %>
+
+        <%= link_to edit_user_registration_path, class: "btn btn-outline-secondary w-100" do %>
+          <i class="bi bi-arrow-left me-1"></i>Back to profile
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>

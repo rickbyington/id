@@ -1,0 +1,54 @@
+<% content_for :title, "Mailbox ##{params[:id]}" %>
+<%= render "devise/shared/flash" %>
+<div class="row">
+  <div class="col-12">
+    <div class="card shadow-sm">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h2 class="h6 mb-0">Mail #<%= params[:id] %></h2>
+        <%= link_to "← Mailbox", mailbox_path, class: "btn btn-link btn-sm" %>
+      </div>
+      <div class="card-body">
+        <dl class="row mb-0 small">
+          <dt class="col-sm-2">From</dt>
+          <dd class="col-sm-10"><%= Array(@delivery.from).join(", ") %></dd>
+          <dt class="col-sm-2">To</dt>
+          <dd class="col-sm-10"><%= Array(@delivery.to).join(", ") %></dd>
+          <% if @delivery.reply_to.present? %>
+            <dt class="col-sm-2">Reply-To</dt>
+            <dd class="col-sm-10"><%= Array(@delivery.reply_to).join(", ") %></dd>
+          <% end %>
+          <dt class="col-sm-2">Subject</dt>
+          <dd class="col-sm-10"><%= @delivery.subject.presence || "(no subject)" %></dd>
+          <% if @delivery.date.present? %>
+            <dt class="col-sm-2">Date</dt>
+            <dd class="col-sm-10"><%= @delivery.date.to_fs(:long) %></dd>
+          <% end %>
+        </dl>
+
+        <hr>
+
+        <% if @delivery.html_part.present? %>
+          <div class="border rounded p-3 bg-light mb-3">
+            <h3 class="h6 text-muted mb-2">HTML body</h3>
+            <iframe srcdoc="<%= @delivery.html_part.body.raw_source.gsub('&', '&amp;').gsub('"', '&quot;') %>" class="w-100 border-0" style="min-height: 400px;" title="HTML content"></iframe>
+          </div>
+        <% end %>
+        <% if @delivery.text_part.present? %>
+          <div class="border rounded p-3 bg-light">
+            <h3 class="h6 text-muted mb-2">Text body</h3>
+            <pre class="mb-0 small" style="white-space: pre-wrap;"><%= @delivery.text_part.body.raw_source %></pre>
+          </div>
+        <% elsif @delivery.html_part.blank? && @delivery.body.present? %>
+          <div class="border rounded p-3 bg-light">
+            <h3 class="h6 text-muted mb-2">Body</h3>
+            <% if @delivery.content_type&.include?("text/html") %>
+              <iframe srcdoc="<%= @delivery.body.raw_source.gsub('&', '&amp;').gsub('"', '&quot;') %>" class="w-100 border-0" style="min-height: 400px;" title="HTML content"></iframe>
+            <% else %>
+              <pre class="mb-0 small" style="white-space: pre-wrap;"><%= @delivery.body.raw_source %></pre>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,66 @@
+# Standalone: app + PostgreSQL for local development.
+#
+# 1. Copy .env.example to .env and set SECRET_KEY_BASE, JWT_SECRET (and optionally OIDC key, POSTGRES_PASSWORD).
+# 2. docker compose -f docker-compose.dev.yml up -d
+# 3. Open http://localhost:3000
+#
+# Or use the published image: image: your-dockerhub-org/id:latest
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    ports:
+      - 5432:5432
+
+  app:
+    build:
+      context: .
+      target: dev
+    image: id:dev
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:3000/up || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    volumes:
+      - ./:/rails
+    environment:
+      BUNDLE_DEPLOYMENT: "0"
+      DATABASE_ADAPTER: postgresql
+      DATABASE_HOST: db
+      DATABASE_USERNAME: postgres
+      DATABASE_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      SECRET_KEY_BASE: ${SECRET_KEY_BASE}
+      JWT_SECRET: ${JWT_SECRET}
+      REQUIRE_STORAGE_MOUNT: "0"
+      # Optional: SMTP (to send real email)
+      SMTP_ADDRESS: ${SMTP_ADDRESS:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER_NAME: ${SMTP_USER_NAME:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      ACTION_MAILER_DEFAULT_HOST: ${ACTION_MAILER_DEFAULT_HOST:-localhost}
+      # SignalWire SMS (required for phone auth)
+      SIGNALWIRE_PROJECT_ID: ${SIGNALWIRE_PROJECT_ID:-}
+      SIGNALWIRE_API_TOKEN: ${SIGNALWIRE_API_TOKEN:-}
+      SIGNALWIRE_SPACE_URL: ${SIGNALWIRE_SPACE_URL:-}
+      SIGNALWIRE_FROM_NUMBER: ${SIGNALWIRE_FROM_NUMBER:-}
+    ports:
+      - "3000:3000"
+
+volumes:
+  postgres_data:
+

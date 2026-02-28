@@ -47,7 +47,7 @@ class HomeController < ApplicationController
       .map do |_app_id, app_tokens|
         token = app_tokens.first
         scopes = token.scopes.present? ? token.scopes.to_s.split : []
-        { application: token.application, scopes: scopes }
+        { application: token.application, scopes: scopes, last_authorized_at: token.created_at }
       end
   end
 end

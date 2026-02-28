@@ -4,23 +4,19 @@ Doorkeeper::OpenidConnect.configure do
   # Issuer identifier - the base URL of your application
   # This should match your application's URL (e.g., https://yourdomain.com or http://localhost:3000)
   issuer do |resource_owner, application|
-    Rails.application.routes.url_helpers.root_url(host: Rails.application.config.action_mailer.default_url_options[:host] || 'localhost',
+    Rails.application.routes.url_helpers.root_url(host: Rails.application.config.action_mailer.default_url_options[:host] || "localhost",
                                                    port: Rails.application.config.action_mailer.default_url_options[:port],
-                                                   protocol: Rails.env.production? ? 'https' : 'http')
+                                                   protocol: Rails.env.production? ? "https" : "http")
   end
 
-  # RSA private key for signing JWT tokens
-  # Generate a key with: openssl genrsa -out config/oidc_private_key.pem 2048
-  # Then read it: File.read(Rails.root.join('config', 'oidc_private_key.pem'))
-  # Or store in credentials: Rails.application.credentials.oidc_private_key
-  # Provide signing key as a PEM string (not a Proc) to avoid OpenSSL::PKey.read errors
-  key_path = Rails.root.join('config', 'oidc_private_key.pem')
-  signing_key_value = File.read(key_path) if key_path.exist?
-  signing_key_value ||= Rails.application.credentials.dig(:oidc, :private_key)
-  raise "Please provide an OIDC signing key (config/oidc_private_key.pem or credentials[:oidc][:private_key])" unless signing_key_value
+  # RSA private key for signing OIDC ID tokens. Set OIDC_PRIVATE_KEY in ENV (PEM string; newlines as \n).
+  # Generate: openssl genrsa 2048 (output PEM, then put in .env with newlines as \n)
+  signing_key_value = ENV["OIDC_PRIVATE_KEY"].to_s.presence
+  signing_key_value = signing_key_value.gsub("\\n", "\n") if signing_key_value
+  raise "Set OIDC_PRIVATE_KEY in ENV (PEM string)" unless signing_key_value.presence
   signing_key signing_key_value
 
-  subject_types_supported [:public]
+  subject_types_supported [ :public ]
 
   # Get the User from the access token
   resource_owner_from_access_token do |access_token|
@@ -53,7 +49,7 @@ Doorkeeper::OpenidConnect.configure do
     # redirect_to(account_select_url)
   end
 
-  # Subject identifier - unique identifier for the user (nil for client_credentials grant)
+   # Subject identifier - unique identifier for the user (nil for client_credentials grant)
    subject do |resource_owner, application|
     resource_owner ? resource_owner.id.to_s : "client_#{application.uid}"
   end
@@ -78,7 +74,7 @@ Doorkeeper::OpenidConnect.configure do
     end
 
     normal_claim :name, scope: :profile, response: %i[id_token user_info] do |resource_owner|
-      [resource_owner.first_name, resource_owner.last_name].compact.join(" ").presence
+      [ resource_owner.first_name, resource_owner.last_name ].compact.join(" ").presence
     end
 
     normal_claim :given_name, scope: :profile, response: %i[id_token user_info] do |resource_owner|

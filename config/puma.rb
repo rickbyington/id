@@ -9,6 +9,17 @@
 # should only set this value when you want to run 2 or more workers. The
 # default is already 1. You can set it to `auto` to automatically start a worker
 # for each available processor.
+workers :auto
+
+# Suppress "* Listening on http://0.0.0.0:3000" (redundant when behind Thruster on port 80)
+module PumaListenFilter
+  def log(str)
+    return if str.to_s.include?("Listening on")
+    super(str)
+  end
+end
+Puma::LogWriter.prepend(PumaListenFilter)
+
 #
 # The ideal number of threads per worker depends both on how much time the
 # application spends waiting for IO operations and on how much you wish to

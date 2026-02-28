@@ -124,7 +124,7 @@ Doorkeeper.configure do
   # Use a custom class for generating the access token.
   # See https://doorkeeper.gitbook.io/guides/configuration/other-configurations#custom-access-token-generator
   #
-  access_token_generator '::Doorkeeper::JWT'
+  access_token_generator "::Doorkeeper::JWT"
 
   # The controller +Doorkeeper::ApplicationController+ inherits from.
   # Defaults to +ActionController::Base+ unless +api_only+ is set, which changes the default to
@@ -294,7 +294,7 @@ Doorkeeper.configure do
   # redirects to localhost for example).
   #
   # Allow HTTP redirects in development (localhost)
-  force_ssl_in_redirect_uri { |uri| !Rails.env.development? && uri.host != 'localhost' }
+  force_ssl_in_redirect_uri { |uri| !Rails.env.development? && uri.host != "localhost" }
 
   # Specify what redirect URI's you want to block during Application creation.
   # Any redirect URI is allowed by default.
@@ -494,7 +494,7 @@ Doorkeeper.configure do
   skip_authorization do |resource_owner, client|
     # Get the actual Doorkeeper::Application record from the client
     application = Doorkeeper::Application.find_by(uid: client.uid)
-    
+
     # Auto-approve if the application has auto_approve flag set to true
     (application&.auto_approve == true) ||
     # Uncomment to also auto-approve for admin users:
@@ -561,11 +561,13 @@ Doorkeeper.configure do
   # realm "Doorkeeper"
 end
 
-# JWT access tokens (doorkeeper-jwt). Set credentials[:jwt][:secret] or JWT_SECRET.
-jwt_secret = Rails.application.credentials.dig(:jwt, :secret) || ENV["JWT_SECRET"]
+# JWT access tokens (doorkeeper-jwt). Set JWT_SECRET in ENV.
+# Skip check when running assets:precompile (SECRET_KEY_BASE_DUMMY=1 in Dockerfile).
+jwt_secret = ENV["JWT_SECRET"].presence
 jwt_secret ||= "dev-jwt-secret-change-in-production" if Rails.env.development?
 jwt_secret ||= "test-jwt-secret" if Rails.env.test?
-raise "Set credentials[:jwt][:secret] or JWT_SECRET for doorkeeper-jwt" unless jwt_secret
+jwt_secret ||= "precompile-dummy" if ENV["SECRET_KEY_BASE_DUMMY"].present?
+raise "Set JWT_SECRET in ENV" unless jwt_secret
 
 Doorkeeper::JWT.configure do
   token_payload do |opts|

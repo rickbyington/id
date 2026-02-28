@@ -1,31 +1,63 @@
+<% login_methods = login_methods_for_pending_oauth_client %>
+<% effective_methods = login_methods.present? ? login_methods : default_login_methods %>
+<% show_email = effective_methods.include?("email") %>
+<% show_phone = effective_methods.include?("phone") && signalwire_configured? %>
+<% show_google = effective_methods.include?("google") && omniauth_google_configured? %>
+<% show_github = effective_methods.include?("github") && omniauth_github_configured? %>
+
 <div class="row justify-content-center">
   <div class="col-12 col-sm-10 col-md-6 col-lg-4">
     <div class="card shadow-sm">
       <div class="card-body p-4">
         <%= render "devise/shared/flash" %>
-        <h2 class="card-title h4 mb-4 text-center">Log in</h2>
+        <h2 class="card-title h4 mb-4 text-center">Sign in</h2>
 
-        <%= form_for(resource, as: resource_name, url: session_path(resource_name)) do |f| %>
-          <div class="mb-3">
-            <%= f.label :email, class: "form-label" %>
-            <%= f.email_field :email, class: "form-control form-control-lg", autofocus: true, autocomplete: "email", placeholder: "you@example.com", required: true %>
-          </div>
+        <% if show_email %>
+          <%= form_for(resource, as: resource_name, url: session_path(resource_name)) do |f| %>
+            <div class="mb-3">
+              <%= f.label :email, class: "form-label" %>
+              <%= f.email_field :email, class: "form-control form-control-lg", autofocus: true, autocomplete: "email", placeholder: "you@example.com", required: true %>
+            </div>
 
-          <div class="mb-3">
-            <%= f.label :password, class: "form-label" %>
-            <%= f.password_field :password, class: "form-control form-control-lg", autocomplete: "current-password", required: true %>
-          </div>
+            <div class="mb-3">
+              <%= f.label :password, class: "form-label" %>
+              <%= f.password_field :password, class: "form-control form-control-lg", autocomplete: "current-password", required: true %>
+            </div>
 
-          <% if devise_mapping.rememberable? %>
-            <div class="mb-4">
-              <div class="form-check">
-                <%= f.check_box :remember_me, class: "form-check-input" %>
-                <%= f.label :remember_me, class: "form-check-label" %>
+            <% if devise_mapping.rememberable? %>
+              <div class="mb-4">
+                <div class="form-check">
+                  <%= f.check_box :remember_me, class: "form-check-input" %>
+                  <%= f.label :remember_me, class: "form-check-label" %>
+                </div>
               </div>
+            <% end %>
+
+            <%= f.submit "Sign in", class: "btn btn-primary btn-lg w-100 mb-2" %>
+          <% end %>
+        <% end %>
+
+        <% if show_phone || show_google || show_github %>
+          <% if show_email %>
+            <div class="text-center my-3">
+              <span class="text-muted small">or</span>
             </div>
           <% end %>
-
-          <%= f.submit "Log in", class: "btn btn-primary btn-lg w-100 mb-2" %>
+          <% if show_phone %>
+            <%= link_to new_phone_session_path, class: "btn btn-outline-secondary btn-lg w-100 mb-2 d-flex align-items-center justify-content-center", data: { turbo: false } do %>
+              <i class="bi bi-phone me-2"></i>Sign in with phone number
+            <% end %>
+          <% end %>
+          <% if show_google %>
+            <%= link_to "/auth/google_oauth2", class: "btn btn-outline-secondary btn-lg w-100 mb-2 d-flex align-items-center justify-content-center", data: { turbo: false } do %>
+              <i class="bi bi-google me-2"></i>Sign in with Google
+            <% end %>
+          <% end %>
+          <% if show_github %>
+            <%= link_to "/auth/github", class: "btn btn-outline-secondary btn-lg w-100 mb-2 d-flex align-items-center justify-content-center", data: { turbo: false } do %>
+              <i class="bi bi-github me-2"></i>Sign in with GitHub
+            <% end %>
+          <% end %>
         <% end %>
 
         <%= render "devise/shared/links" %>

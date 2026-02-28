@@ -55,10 +55,12 @@ module Admin
     end
 
     def application_params
-      p = params.require(:application).permit(:name, :redirect_uri, :confidential, :auto_approve, scopes: [])
+      p = params.require(:application).permit(:name, :redirect_uri, :confidential, :auto_approve, scopes: [], login_methods: [])
       scopes = params.dig(:application, :scopes)
       selected = scopes.is_a?(Array) ? scopes.reject(&:blank?) : scopes.to_s.split
-      p[:scopes] = (["openid"] + selected).uniq.join(" ")
+      p[:scopes] = ([ "openid" ] + selected).uniq.join(" ")
+      login_methods = params.dig(:application, :login_methods)
+      p[:login_methods] = (login_methods.is_a?(Array) ? login_methods.reject(&:blank?) : login_methods.to_s.split(",").map(&:strip)).presence&.join(",") || "email"
       p
     end
   end

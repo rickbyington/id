@@ -1,0 +1,58 @@
+<div class="row justify-content-center">
+  <div class="col-12 col-sm-10 col-md-6 col-lg-4">
+    <div class="card shadow-sm">
+      <div class="card-body p-4">
+        <%= render "devise/shared/flash" %>
+        <h2 class="card-title h4 mb-4 text-center">Edit profile</h2>
+
+        <%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { method: :put }) do |f| %>
+          <%= render "devise/shared/error_messages", resource: resource %>
+
+          <div class="mb-3">
+            <%= f.label :first_name, class: "form-label" %>
+            <%= f.text_field :first_name, class: "form-control form-control-lg", autofocus: true, autocomplete: "given-name", placeholder: "First name" %>
+          </div>
+
+          <div class="mb-3">
+            <%= f.label :last_name, class: "form-label" %>
+            <%= f.text_field :last_name, class: "form-control form-control-lg", autocomplete: "family-name", placeholder: "Last name" %>
+          </div>
+
+          <div class="mb-3">
+            <%= f.label :email, class: "form-label" %>
+            <%= f.email_field :email, class: "form-control form-control-lg", autocomplete: "email", placeholder: "you@example.com" %>
+            <% if resource.unconfirmed_email.present? %>
+              <div class="form-text text-warning mt-1">
+                Pending: <strong><%= resource.unconfirmed_email %></strong> — check your inbox and confirm the link to complete the change.
+              </div>
+            <% end %>
+          </div>
+
+          <% if resource.phone_number.present? || signalwire_configured? %>
+            <div class="mb-3">
+              <label class="form-label">Phone number</label>
+              <% if resource.phone_number.present? %>
+                <p class="form-control-plaintext mb-1"><%= resource.phone_number %></p>
+                <%= link_to "Change phone number", new_user_phone_change_path, class: "btn btn-outline-secondary btn-sm" %>
+              <% else %>
+                <%= link_to "Add phone number", new_user_phone_change_path, class: "btn btn-outline-secondary btn-sm" %>
+              <% end %>
+            </div>
+          <% end %>
+
+          <%= f.submit "Update profile", class: "btn btn-primary btn-lg w-100 mb-2" %>
+        <% end %>
+
+        <% if resource.encrypted_password.present? %>
+          <p class="text-center mt-2">
+            <%= link_to "Change password", edit_user_password_change_path, class: "text-muted small" %>
+          </p>
+        <% end %>
+
+        <%= link_to root_path, class: "btn btn-outline-secondary w-100" do %>
+          <i class="bi bi-arrow-left me-1"></i>Back to welcome
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>

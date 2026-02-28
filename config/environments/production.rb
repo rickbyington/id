@@ -3,6 +3,9 @@ require "active_support/core_ext/integer/time"
 Rails.application.configure do
   # Settings specified here will take precedence over those in config/application.rb.
 
+  # All secrets from ENV; no Rails credentials or config/master.key.
+  config.require_master_key = false
+
   # Code is not reloaded between requests.
   config.enable_reloading = false
 
@@ -57,17 +60,25 @@ Rails.application.configure do
   # Set this to true and configure the email server for immediate delivery to raise delivery errors.
   # config.action_mailer.raise_delivery_errors = false
 
-  # Set host to be used by links generated in mailer templates.
-  config.action_mailer.default_url_options = { host: "example.com" }
+  # Set host to be used by links generated in mailer templates (e.g. confirmation links).
+  config.action_mailer.default_url_options = {
+    host: ENV.fetch("ACTION_MAILER_DEFAULT_HOST", "localhost"),
+    protocol: ENV["ACTION_MAILER_DEFAULT_PROTOCOL"] || "https"
+  }
 
-  # Specify outgoing SMTP server. Remember to add smtp/* credentials via bin/rails credentials:edit.
-  # config.action_mailer.smtp_settings = {
-  #   user_name: Rails.application.credentials.dig(:smtp, :user_name),
-  #   password: Rails.application.credentials.dig(:smtp, :password),
-  #   address: "smtp.example.com",
-  #   port: 587,
-  #   authentication: :plain
-  # }
+  # Use test mailbox (in-memory) when no SMTP is configured; otherwise use SMTP.
+  if ENV["SMTP_ADDRESS"].blank?
+    config.action_mailer.delivery_method = :test
+  else
+    config.action_mailer.delivery_method = :smtp
+    config.action_mailer.smtp_settings = {
+      user_name: ENV["SMTP_USER_NAME"],
+      password: ENV["SMTP_PASSWORD"],
+      address: ENV["SMTP_ADDRESS"],
+      port: (ENV["SMTP_PORT"] || 587).to_i,
+      authentication: :plain
+    }
+  end
 
   # Enable locale fallbacks for I18n (makes lookups for any locale fall back to
   # the I18n.default_locale when a translation cannot be found).

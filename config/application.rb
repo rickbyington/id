@@ -23,5 +23,14 @@ module Id
     #
     # config.time_zone = "Central Time (US & Canada)"
     # config.eager_load_paths << Rails.root.join("extras")
+
+    # Fail fast if SECRET_KEY_BASE is missing (avoids secure_compare errors from nil).
+    # Skip during assets:precompile (Dockerfile sets SECRET_KEY_BASE_DUMMY=1).
+    config.after_initialize do
+      next if ENV["SECRET_KEY_BASE_DUMMY"].present?
+      if Rails.application.secret_key_base.blank?
+        raise "SECRET_KEY_BASE is not set. Set it in ENV (e.g. .env or .kamal/secrets)."
+      end
+    end
   end
 end

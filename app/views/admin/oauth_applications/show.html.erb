@@ -17,6 +17,10 @@
   <dd class="col-sm-9"><%= @oauth_application.redirect_uri %></dd>
   <dt class="col-sm-3">Scopes</dt>
   <dd class="col-sm-9"><%= @oauth_application.scopes.presence || "—" %></dd>
+  <% if @oauth_application.respond_to?(:login_methods) %>
+  <dt class="col-sm-3">Login methods</dt>
+  <dd class="col-sm-9"><%= @oauth_application.login_methods.presence || "email" %></dd>
+  <% end %>
   <dt class="col-sm-3">Confidential</dt>
   <dd class="col-sm-9"><%= @oauth_application.confidential? ? "Yes" : "No" %></dd>
   <dt class="col-sm-3">Auto approve</dt>
