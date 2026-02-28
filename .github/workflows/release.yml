@@ -1,0 +1,36 @@
+# Semantic-release: analyze commits on main, create GitHub release and tag (v1.2.3).
+# Use conventional commits (fix:, feat:, BREAKING CHANGE:) to drive version bumps.
+# The tag then triggers .github/workflows/docker-publish.yml to build and push images.
+
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "lts/*"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npx semantic-release

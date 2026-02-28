@@ -48,13 +48,16 @@ This project uses [Semantic Versioning](https://semver.org/). The version is in 
 
 ### Releasing
 
-1. Bump `VERSION` (e.g. `0.1.0` → `0.2.0`).
-2. Add an entry under `[Unreleased]` in `CHANGELOG.md`, then move it under a new `[X.Y.Z]` heading with the release date.
-3. Commit: `git add VERSION CHANGELOG.md && git commit -m "Release vX.Y.Z"`.
-4. Tag and push: `git tag vX.Y.Z && git push origin main --tags`.
-5. Create a [GitHub Release](https://docs.github.com/en/repositories/releasing-projects-on-github/managing-releases-in-a-repository) from the tag and paste the changelog entry.
+Releases are driven by [semantic-release](https://github.com/semantic-release/semantic-release) and [conventional commits](https://www.conventionalcommits.org/).
 
-Replace `your-org/id` in `CHANGELOG.md` links with your GitHub org/repo.
+1. **Use conventional commits on `main`** so the next version is computed automatically:
+   - `fix:` or `fix(scope):` → patch (e.g. 0.1.0 → 0.1.1)
+   - `feat:` or `feat(scope):` → minor (e.g. 0.1.0 → 0.2.0)
+   - `BREAKING CHANGE:` in a footer or `feat!:` → major (e.g. 0.1.0 → 1.0.0)
+2. **Push to `main`.** The [Release](.github/workflows/release.yml) workflow runs, analyzes commits, updates `CHANGELOG.md` and `VERSION`, creates a GitHub release and tag (e.g. `v0.2.0`).
+3. **The tag triggers [Docker Publish](.github/workflows/docker-publish.yml)** to build and push `id:<version>` and `id:standalone` to Docker Hub.
+
+No manual tagging or release drafting is required. Replace `your-org/id` in `CHANGELOG.md` links with your GitHub org/repo.
 
 ## Docker
 
