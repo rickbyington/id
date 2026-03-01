@@ -123,4 +123,3 @@ The workflow `.github/workflows/docker-publish.yml` runs when a version tag (e.g
 4. Run `bundle install` once so `Gemfile.lock` includes the `sqlite3` gem (required for the standalone image build).
 5. Push to `main` (with conventional commits); after CI passes, Release runs and pushes a tag, which triggers the Docker workflow. Or push a tag manually: `git tag v0.1.0 && git push origin v0.1.0`.
 6. The workflow builds and pushes both images: `id:<version>` and `id:latest` (Postgres), `id:<version>-standalone` and `id:standalone` (SQLite).
-
