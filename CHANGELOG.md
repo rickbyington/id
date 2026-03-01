@@ -1,3 +1,10 @@
+# 1.0.0 (2026-03-01)
+
+
+### Features
+
+* cut new release ([3e54d1b](https://github.com/rickbyington/id/commit/3e54d1b43d441774150cc7aa943d447d33d3cc98))
+
 ## [1.0.7](https://github.com/byingtondesign/id/compare/v1.0.6...v1.0.7) (2026-02-28)
 
 
