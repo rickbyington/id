@@ -1,0 +1,11 @@
+<% content_for :title, "New application" %>
+<p><%= link_to "← Applications", admin_oauth_applications_path, class: "text-decoration-none" %></p>
+<h1 class="h3 mb-3">New OAuth application</h1>
+
+<%= form_with model: @oauth_application, url: admin_oauth_applications_path, scope: :application, local: true do |f| %>
+  <%= render "form", f: f %>
+  <div class="d-flex gap-2 mt-3">
+    <%= f.submit "Create application", class: "btn btn-primary" %>
+    <%= link_to "Cancel", admin_oauth_applications_path, class: "btn btn-outline-secondary" %>
+  </div>
+<% end %>

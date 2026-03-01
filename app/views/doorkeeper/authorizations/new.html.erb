@@ -1,0 +1,49 @@
+<div class="card shadow-sm">
+  <div class="card-body">
+    <h1 class="card-title h4"><%= t('.title') %></h1>
+    <p class="card-text text-muted"><%= t('.prompt', client_name: @pre_auth.client.name) %></p>
+
+    <% if @pre_auth.scopes.count > 0 %>
+      <p class="mb-1"><strong><%= t('.able_to') %>:</strong></p>
+      <ul class="mb-3">
+        <% @pre_auth.scopes.each do |scope| %>
+          <li><%= t scope, scope: [:doorkeeper, :scopes] %></li>
+        <% end %>
+      </ul>
+    <% end %>
+
+    <% auth_params = {
+      client_id: @pre_auth.client.uid,
+      redirect_uri: @pre_auth.redirect_uri,
+      state: @pre_auth.state,
+      response_type: @pre_auth.response_type,
+      scope: @pre_auth.scope,
+      code_challenge: @pre_auth.code_challenge,
+      code_challenge_method: @pre_auth.code_challenge_method
+    } %>
+
+    <div class="d-flex gap-2">
+      <%= form_tag oauth_authorization_path, method: :post, class: "d-inline" do %>
+        <%= hidden_field_tag :client_id, auth_params[:client_id] %>
+        <%= hidden_field_tag :redirect_uri, auth_params[:redirect_uri] %>
+        <%= hidden_field_tag :state, auth_params[:state] %>
+        <%= hidden_field_tag :response_type, auth_params[:response_type] %>
+        <%= hidden_field_tag :scope, auth_params[:scope] %>
+        <%= hidden_field_tag :code_challenge, auth_params[:code_challenge] %>
+        <%= hidden_field_tag :code_challenge_method, auth_params[:code_challenge_method] %>
+        <%= submit_tag t('.buttons.authorize'), class: 'btn btn-primary' %>
+      <% end %>
+
+      <%= form_tag oauth_authorization_path, method: :delete, class: "d-inline" do %>
+        <%= hidden_field_tag :client_id, auth_params[:client_id] %>
+        <%= hidden_field_tag :redirect_uri, auth_params[:redirect_uri] %>
+        <%= hidden_field_tag :state, auth_params[:state] %>
+        <%= hidden_field_tag :response_type, auth_params[:response_type] %>
+        <%= hidden_field_tag :scope, auth_params[:scope] %>
+        <%= hidden_field_tag :code_challenge, auth_params[:code_challenge] %>
+        <%= hidden_field_tag :code_challenge_method, auth_params[:code_challenge_method] %>
+        <%= submit_tag t('.buttons.deny'), class: 'btn btn-outline-secondary' %>
+      <% end %>
+    </div>
+  </div>
+</div>

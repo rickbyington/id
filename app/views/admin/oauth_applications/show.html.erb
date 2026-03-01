@@ -1,0 +1,32 @@
+<% content_for :title, @oauth_application.name %>
+<p class="mb-2"><%= link_to "← Applications", admin_oauth_applications_path, class: "text-decoration-none small" %></p>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h1 class="h3 mb-0"><%= @oauth_application.name %></h1>
+  <%= link_to edit_admin_oauth_application_path(@oauth_application), class: "btn btn-outline-primary btn-sm" do %><i class="bi bi-pencil me-1"></i>Edit<% end %>
+</div>
+
+<dl class="row">
+  <dt class="col-sm-3">Name</dt>
+  <dd class="col-sm-9"><%= @oauth_application.name %></dd>
+  <dt class="col-sm-3">UID</dt>
+  <dd class="col-sm-9"><code><%= @oauth_application.uid %></code></dd>
+  <dt class="col-sm-3">Secret</dt>
+  <dd class="col-sm-9"><code><%= @oauth_application.plaintext_secret %></code></dd>
+  <dt class="col-sm-3">Redirect URI</dt>
+  <dd class="col-sm-9"><%= @oauth_application.redirect_uri %></dd>
+  <dt class="col-sm-3">Scopes</dt>
+  <dd class="col-sm-9"><%= @oauth_application.scopes.presence || "—" %></dd>
+  <% if @oauth_application.respond_to?(:login_methods) %>
+  <dt class="col-sm-3">Login methods</dt>
+  <dd class="col-sm-9"><%= @oauth_application.login_methods.presence || "email" %></dd>
+  <% end %>
+  <dt class="col-sm-3">Confidential</dt>
+  <dd class="col-sm-9"><%= @oauth_application.confidential? ? "Yes" : "No" %></dd>
+  <dt class="col-sm-3">Auto approve</dt>
+  <dd class="col-sm-9"><%= @oauth_application.auto_approve? ? "Yes" : "No" %></dd>
+</dl>
+
+<div class="pt-4 mt-4 border-top">
+  <%= button_to admin_oauth_application_path(@oauth_application), method: :delete, form: { data: { turbo_confirm: "Are you sure? This cannot be undone." } }, class: "btn btn-outline-danger" do %><i class="bi bi-trash me-1"></i>Delete<% end %>
+</div>

@@ -1,0 +1,71 @@
+<% display_name =
+     if current_user.first_name.present? || current_user.last_name.present?
+       [current_user.first_name, current_user.last_name].reject(&:blank?).join(" ")
+     elsif current_user.email.present?
+       current_user.email
+     else
+       nil
+     end
+%>
+<div class="row justify-content-center">
+  <div class="col-12 col-sm-10 col-md-6 col-lg-4">
+    <div class="card shadow-sm">
+      <div class="card-body p-4">
+        <%= render "devise/shared/flash" %>
+        <h2 class="card-title h4 mb-4 text-center">
+          Welcome<%= display_name.present? ? ", #{display_name}" : "" %>
+        </h2>
+
+        <% name_blank = current_user.first_name.blank? && current_user.last_name.blank? %>
+        <% if name_blank %>
+          <p class="text-center mb-3">
+            <%= link_to "Add your name", edit_user_registration_path, class: "btn btn-outline-primary btn-sm" %>
+          </p>
+        <% end %>
+        <p class="text-center mb-4">
+          <%= link_to "Edit profile", edit_user_registration_path, class: "text-muted small" %>
+        </p>
+
+        <% if @authorized_applications.present? %>
+          <h3 class="h6 text-muted mb-2">Applications you've authorized</h3>
+          <ul class="list-unstyled mb-4">
+            <% @authorized_applications.each do |entry| %>
+              <li class="mb-3 pb-3 border-bottom d-flex justify-content-between align-items-start gap-2">
+                <div class="flex-grow-1 min-w-0">
+                  <% app_link = app_url(entry[:application]) %>
+                  <% if app_link.present? %>
+                    <strong><%= link_to entry[:application].name, app_link, target: "_blank", rel: "noopener noreferrer" %></strong>
+                  <% else %>
+                    <strong><%= entry[:application].name %></strong>
+                  <% end %>
+                  <% if entry[:scopes].present? %>
+                    <div class="small text-muted mt-1">
+                      Scopes: <%= entry[:scopes].join(", ") %>
+                    </div>
+                  <% end %>
+                  <% if entry[:last_authorized_at].present? %>
+                    <div class="small text-muted mt-1">
+                      Last authorized: <%= time_ago_in_words(entry[:last_authorized_at]) %> ago
+                    </div>
+                  <% end %>
+                </div>
+                <%= button_to "Revoke access", revoke_authorized_application_path(entry[:application].id), method: :delete, class: "btn btn-outline-danger btn-sm flex-shrink-0", form: { data: { turbo: false } }, data: { turbo_confirm: "Revoke access for #{entry[:application].name}?" } %>
+              </li>
+            <% end %>
+          </ul>
+        <% else %>
+          <p class="text-muted small mb-4">You haven't authorized any applications yet.</p>
+        <% end %>
+
+        <% if current_user.admin? %>
+          <%= link_to "Admin", admin_root_path, class: "btn btn-outline-secondary btn-lg w-100 mb-2" %>
+        <% end %>
+        <% if current_user.admin? && mailbox_available? %>
+          <%= link_to "Mailbox", mailbox_path, class: "btn btn-outline-secondary btn-lg w-100 mb-2" %>
+        <% end %>
+
+        <%= button_to "Sign out", destroy_user_session_path, method: :delete, class: "btn btn-primary btn-lg w-100" %>
+      </div>
+    </div>
+  </div>
+</div>

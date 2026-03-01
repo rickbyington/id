@@ -1,0 +1,11 @@
+<% content_for :title, "Edit #{@permission.name}" %>
+<p><%= link_to "← Permissions", admin_permissions_path, class: "text-decoration-none" %></p>
+<h1 class="h3 mb-3">Edit permission</h1>
+
+<%= form_with model: @permission, url: admin_permission_path(@permission), method: :patch, local: true do |f| %>
+  <%= render "form", f: f %>
+  <div class="d-flex gap-2 mt-3">
+    <%= f.submit "Update permission", class: "btn btn-primary" %>
+    <%= link_to "Cancel", admin_permission_path(@permission), class: "btn btn-outline-secondary" %>
+  </div>
+<% end %>

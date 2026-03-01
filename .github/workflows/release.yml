@@ -1,0 +1,48 @@
+# Semantic-release: runs after CI succeeds on main. Creates GitHub release and tag (v1.2.3).
+# Use conventional commits (fix:, feat:, BREAKING CHANGE:) to drive version bumps.
+# The tag push triggers .github/workflows/docker-publish.yml.
+#
+# IMPORTANT: Tag pushes made with GITHUB_TOKEN do not trigger other workflows.
+# Add a repo secret GH_TOKEN (Personal Access Token with repo scope) so the tag
+# push triggers Docker Publish. Create at: GitHub → Settings → Developer settings
+# → Personal access tokens → Fine-grained or Classic (repo scope).
+
+name: Release
+
+on:
+  workflow_run:
+    workflows: [ CI ]
+    types: [ completed ]
+    branches: [ main ]
+
+permissions:
+  contents: write   # create tag, release, push VERSION/changelog
+  issues: read     # release-notes-generator links commits to PRs/issues
+  pull-requests: read
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    # Only run when CI workflow succeeded (not failed/cancelled)
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          fetch-depth: 0
+          token: ${{ secrets.GH_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "lts/*"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN || secrets.GITHUB_TOKEN }}
+        run: npx semantic-release

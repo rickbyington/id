@@ -1,0 +1,11 @@
+<% content_for :title, "Edit #{@oauth_application.name}" %>
+<p><%= link_to "← Applications", admin_oauth_applications_path, class: "text-decoration-none" %></p>
+<h1 class="h3 mb-3">Edit application</h1>
+
+<%= form_with model: @oauth_application, url: admin_oauth_application_path(@oauth_application), method: :patch, scope: :application, local: true do |f| %>
+  <%= render "form", f: f %>
+  <div class="d-flex gap-2 mt-3">
+    <%= f.submit "Update application", class: "btn btn-primary" %>
+    <%= link_to "Cancel", admin_oauth_application_path(@oauth_application), class: "btn btn-outline-secondary" %>
+  </div>
+<% end %>

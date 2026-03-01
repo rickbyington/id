@@ -1,0 +1,50 @@
+# CodeQL: static analysis for code-level vulnerabilities (injection, XSS, ReDoS, etc.).
+# Results appear in the Security tab → Code scanning.
+# Runs weekly (Monday 06:00 UTC) only when main has new commits in the last 7 days.
+name: CodeQL
+
+on:
+  schedule:
+    - cron: "0 6 * * 1"  # Weekly Monday 06:00 UTC
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      actions: read
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Check for recent commits on main
+        id: changes
+        run: |
+          if git log -1 --since="7 days ago" --format=%H; then
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Set up Ruby
+        if: steps.changes.outputs.has_changes == 'true'
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.4"
+          bundler-cache: true
+
+      - name: Initialize CodeQL
+        if: steps.changes.outputs.has_changes == 'true'
+        uses: github/codeql-action/init@v4
+        with:
+          languages: ruby
+
+      - name: Perform CodeQL analysis
+        if: steps.changes.outputs.has_changes == 'true'
+        uses: github/codeql-action/analyze@v4
+        with:
+          category: "/language:ruby"

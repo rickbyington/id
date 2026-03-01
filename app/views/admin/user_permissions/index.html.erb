@@ -1,0 +1,22 @@
+<% content_for :title, "User permissions" %>
+<h1 class="h3 mb-3">User permissions</h1>
+<p><%= link_to "New user permission", new_admin_user_permission_path, class: "btn btn-primary" %></p>
+
+<div class="table-responsive">
+  <table class="table table-striped table-bordered">
+    <thead class="table-light">
+      <tr>
+        <th>User</th>
+        <th>Permission</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @user_permissions.each do |up| %>
+        <tr>
+          <td><%= link_to up.user.email, admin_user_path(up.user), class: "text-decoration-none" %></td>
+          <td><%= link_to (up.permission.value.present? ? "#{up.permission.name} (#{up.permission.value})" : up.permission.name), admin_user_permission_path(up), class: "text-decoration-none fw-medium" %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

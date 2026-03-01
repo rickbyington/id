@@ -1,0 +1,3 @@
+# act runner image: medium (~500MB), works with most actions (ruby/setup-ruby, etc.)
+# See https://nektosact.com/usage/runners/
+-P ubuntu-latest=catthehacker/ubuntu:act-latest

@@ -1,0 +1,26 @@
+<div class="row justify-content-center">
+  <div class="col-12 col-sm-10 col-md-6 col-lg-4">
+    <div class="card shadow-sm">
+      <div class="card-body p-4">
+        <%= render "devise/shared/flash" %>
+        <h2 class="card-title h4 mb-4 text-center">Sign in with phone</h2>
+
+        <%= form_with url: phone_session_path, method: :post do |f| %>
+          <div class="mb-4">
+            <label for="phone" class="form-label">Phone number</label>
+            <%= f.telephone_field :phone, class: "form-control form-control-lg", id: "phone", placeholder: "+15551234567", autocomplete: "tel", autofocus: true, required: true %>
+            <div class="form-text">Enter your number in international format, e.g. +15551234567</div>
+          </div>
+
+          <%= f.submit "Send code", class: "btn btn-primary btn-lg w-100 mb-2" %>
+        <% end %>
+
+        <hr class="my-4">
+        <div class="text-center small text-muted">
+          <%= link_to "Sign in with email instead", new_user_session_path, class: "text-decoration-none me-3" %>
+          <%= link_to "Sign up with phone", new_phone_registration_path, class: "text-decoration-none" %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

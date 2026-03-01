@@ -1,0 +1,49 @@
+<div class="mb-3">
+  <%= f.label :name, class: "form-label" %>
+  <%= f.text_field :name, class: "form-control", required: true %>
+</div>
+<div class="mb-3">
+  <%= f.label :redirect_uri, class: "form-label" %>
+  <%= f.url_field :redirect_uri, class: "form-control", required: true, placeholder: "https://client-app.example.com/callback" %>
+  <div class="form-text">Use the URL of the application that will use these keys (e.g. its callback URL for auth code flows, or its base URL). For Client Credentials–only apps this is not used but still required.</div>
+</div>
+<div class="mb-3">
+  <fieldset class="border rounded p-3">
+    <legend class="float-none w-auto px-2">Scopes</legend>
+    <p class="small text-muted"><code>openid</code> is always included (required for OpenID Connect).</p>
+    <% selected_scopes = @oauth_application.scopes.to_s.split %>
+    <% @available_scopes.each do |scope| %>
+      <div class="form-check">
+        <%= check_box_tag "application[scopes][]", scope, selected_scopes.include?(scope), class: "form-check-input", id: "scope_#{scope}" %>
+        <%= label_tag "scope_#{scope}", scope, class: "form-check-label" %>
+      </div>
+    <% end %>
+  </fieldset>
+</div>
+<div class="mb-3">
+  <fieldset class="border rounded p-3">
+    <legend class="float-none w-auto px-2">Login methods</legend>
+    <p class="small text-muted">Which sign-in options to show when users log in for this application.</p>
+    <% selected_login_methods = (@oauth_application.respond_to?(:login_methods) && @oauth_application.login_methods.present? ? @oauth_application.login_methods.to_s.split(",").map(&:strip) : %w[email]) %>
+    <div class="form-check">
+      <%= check_box_tag "application[login_methods][]", "email", selected_login_methods.include?("email"), class: "form-check-input", id: "login_method_email" %>
+      <%= label_tag "login_method_email", "Email (password)", class: "form-check-label" %>
+    </div>
+    <div class="form-check">
+      <%= check_box_tag "application[login_methods][]", "google", selected_login_methods.include?("google"), class: "form-check-input", id: "login_method_google" %>
+      <%= label_tag "login_method_google", "Google", class: "form-check-label" %>
+    </div>
+    <div class="form-check">
+      <%= check_box_tag "application[login_methods][]", "github", selected_login_methods.include?("github"), class: "form-check-input", id: "login_method_github" %>
+      <%= label_tag "login_method_github", "GitHub", class: "form-check-label" %>
+    </div>
+  </fieldset>
+</div>
+<div class="mb-3 form-check">
+  <%= f.check_box :confidential, class: "form-check-input" %>
+  <%= f.label :confidential, class: "form-check-label" %>
+</div>
+<div class="mb-3 form-check">
+  <%= f.check_box :auto_approve, class: "form-check-input" %>
+  <%= f.label :auto_approve, class: "form-check-label" %>
+</div>

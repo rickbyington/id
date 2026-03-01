@@ -1,0 +1,8 @@
+<div class="card shadow-sm">
+  <div class="card-body">
+    <h1 class="card-title h4"><%= t('.title') %></h1>
+    <% error_message = @pre_auth.error_response&.description.presence || @pre_auth.error_response&.body&.dig(:error_description) || @pre_auth.error_response&.body&.dig("error_description") || @pre_auth.invalid_request_reason || @pre_auth.error&.to_s %>
+    <p class="card-text"><%= error_message.presence || t('.title') %></p>
+    <%= link_to "Back", root_path, class: "btn btn-outline-secondary" %>
+  </div>
+</div>
