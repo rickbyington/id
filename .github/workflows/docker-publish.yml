@@ -1,5 +1,5 @@
-# Build and push two Docker images to Docker Hub when a version tag (v*) is pushed.
-# Semantic-release (release.yml) pushes the tag after CI passes; this runs on that tag push.
+# Build and push two Docker images when Release workflow completes.
+# (Semantic-release creates the tag via the API, so push: tags never fires.)
 # Set GitHub repo secrets: DOCKERHUB_USERNAME, DOCKERHUB_TOKEN.
 #
 # Postgres (expects external DB): <user>/id:<version> and :latest
@@ -10,13 +10,15 @@
 name: Docker Publish
 
 on:
-  push:
-    tags:
-      - "v*"
+  workflow_run:
+    workflows: [ Release ]
+    types: [ completed ]
+    branches: [ main ]
 
 jobs:
   build-scan-push:
     runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     permissions:
       contents: read
       id-token: write
@@ -24,6 +26,22 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          fetch-depth: 0
+
+      - name: Get latest version tag
+        id: version
+        run: |
+          git fetch origin 'refs/tags/v*:refs/tags/v*' 2>/dev/null || true
+          TAG=$(git tag -l 'v*' --sort=-v:refname | head -1)
+          if [ -z "$TAG" ]; then echo "No v* tag found"; exit 1; fi
+          echo "VERSION=${TAG#v}" >> $GITHUB_OUTPUT
+
+      - name: Checkout at tag
+        uses: actions/checkout@v6
+        with:
+          ref: v${{ steps.version.outputs.VERSION }}
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -36,10 +54,6 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Extract version from tag
-        id: version
-        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
 
       - name: Build Postgres image (no push)
         id: build-postgres

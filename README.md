@@ -115,11 +115,10 @@ Both images come from one Dockerfile. Default build is Postgres; use `--target s
 
 ### Publishing to Docker Hub
 
-The workflow `.github/workflows/docker-publish.yml` runs when a version tag (e.g. `v0.1.0`) is pushed. With semantic-release, that tag is pushed after CI passes; the tag must be pushed using a **Personal Access Token** or the Docker workflow will not trigger.
+The workflow `.github/workflows/docker-publish.yml` runs when the Release workflow completes (after CI passes on main). Semantic-release creates the version tag and GitHub release; no extra token is needed for Docker Publish.
 
 1. Add repo secrets: `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN` (Docker Hub → Account Settings → Security → New Access Token).
-2. Add repo secret **`GH_TOKEN`**: a GitHub Personal Access Token with `repo` scope (Settings → Developer settings → Personal access tokens). The Release workflow uses it to push the version tag so that the tag push triggers Docker Publish. Without `GH_TOKEN`, releases still run but Docker images are not built.
-3. **(Optional)** Add repo secret **`CODECOV_TOKEN`**: sign up at [codecov.io](https://codecov.io) (free for public repos), add this repo, then paste the token so CI can upload coverage. Without it, the coverage upload step is skipped and the Codecov badge will show "unknown".
-4. Run `bundle install` once so `Gemfile.lock` includes the `sqlite3` gem (required for the standalone image build).
-5. Push to `main` (with conventional commits); after CI passes, Release runs and pushes a tag, which triggers the Docker workflow. Or push a tag manually: `git tag v0.1.0 && git push origin v0.1.0`.
-6. The workflow builds and pushes both images: `id:<version>` and `id:latest` (Postgres), `id:<version>-standalone` and `id:standalone` (SQLite).
+2. **(Optional)** Add repo secret **`CODECOV_TOKEN`**: sign up at [codecov.io](https://codecov.io) (free for public repos), add this repo, then paste the token so CI can upload coverage. Without it, the coverage upload step is skipped and the Codecov badge will show "unknown".
+3. Run `bundle install` once so `Gemfile.lock` includes the `sqlite3` gem (required for the standalone image build).
+4. Push to `main` (with conventional commits); after CI passes, Release runs and Docker Publish runs. Or push a tag manually: `git tag v0.1.0 && git push origin v0.1.0`.
+5. The workflow builds and pushes both images: `id:<version>` and `id:latest` (Postgres), `id:<version>-standalone` and `id:standalone` (SQLite).
