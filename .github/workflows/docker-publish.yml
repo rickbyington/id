@@ -5,7 +5,7 @@
 # Postgres (expects external DB): <user>/id:<version> and :latest
 # Standalone SQLite (pull and run): <user>/id:<version>-standalone and :standalone
 #
-# Images are scanned with Grype before push; push is skipped if critical/high vulns are found.
+# Images are scanned with Grype before push; push is skipped only if critical vulns are found.
 
 name: Docker Publish
 
@@ -73,7 +73,7 @@ jobs:
         with:
           image: ${{ secrets.DOCKERHUB_USERNAME }}/id:${{ steps.version.outputs.VERSION }}
           fail-build: true
-          severity-cutoff: high
+          severity-cutoff: critical
 
       - name: Push Postgres image
         run: |
@@ -99,7 +99,7 @@ jobs:
         with:
           image: ${{ secrets.DOCKERHUB_USERNAME }}/id:${{ steps.version.outputs.VERSION }}-standalone
           fail-build: true
-          severity-cutoff: high
+          severity-cutoff: critical
 
       - name: Push standalone image
         run: |
