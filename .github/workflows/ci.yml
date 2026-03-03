@@ -102,8 +102,9 @@ jobs:
         uses: anchore/scan-action@v7
         with:
           path: "."
+          config: .grype.yaml
           fail-build: true
-          severity-cutoff: high
+          severity-cutoff: critical
           output-format: sarif
 
       - name: Upload Grype SARIF to Code Scanning

@@ -1,0 +1,7 @@
+# Grype ignore rules. Used by CI and Docker Publish scans.
+# See https://oss.anchore.com/docs/reference/grype/configuration/
+
+ignore:
+  # Go stdlib CVE inside thruster gem's Go binary (bin/thrust). Not fixable without
+  # a new thruster release built with Go 1.25.7+. Track: https://github.com/basecamp/thruster
+  - vulnerability: CVE-2025-68121

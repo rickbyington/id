@@ -76,6 +76,7 @@ jobs:
         uses: anchore/scan-action@v7
         with:
           image: ${{ secrets.DOCKERHUB_USERNAME }}/id:${{ steps.version.outputs.VERSION }}
+          config: .grype.yaml
           fail-build: true
           severity-cutoff: critical
 
@@ -106,6 +107,7 @@ jobs:
         uses: anchore/scan-action@v7
         with:
           image: ${{ secrets.DOCKERHUB_USERNAME }}/id:${{ steps.version.outputs.VERSION }}-standalone
+          config: .grype.yaml
           fail-build: true
           severity-cutoff: critical
 
