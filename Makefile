@@ -37,10 +37,11 @@ clean-data: down ; $(COMPOSE) down -v ; echo "Stopped and removed volumes"
 
 # Run the GitHub Actions CI workflow locally via [act](https://github.com/nektos/act) in Docker.
 # Uses the same workflow file as GitHub; no act install required on the host.
+# Event file ensures push is treated as main so the workflow runs; exit code propagates so make fails on job failure.
 ci:
-	docker run --rm -it \
+	docker run --rm \
 	  -v "$(CURDIR):/workspace" \
 	  -v /var/run/docker.sock:/var/run/docker.sock \
 	  -w /workspace \
 	  -e DOCKER_HOST=unix:///var/run/docker.sock \
-	  efrecon/act:v0.2.84 push -W .github/workflows/ci.yml -P ubuntu-latest=catthehacker/ubuntu:act-latest
+	  efrecon/act:v0.2.84 push -W .github/workflows/ci.yml -e .github/events/push-main.json -P ubuntu-latest=catthehacker/ubuntu:act-latest || exit 1
