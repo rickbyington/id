@@ -1,3 +1,10 @@
+# [1.3.0](https://github.com/rickbyington/id/compare/v1.2.0...v1.3.0) (2026-03-03)
+
+
+### Features
+
+* cut new release ([f49571f](https://github.com/rickbyington/id/commit/f49571f319551a7e646101a31ed069037bda850d))
+
 # [1.2.0](https://github.com/rickbyington/id/compare/v1.1.0...v1.2.0) (2026-03-03)
 
 
