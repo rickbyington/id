@@ -12,8 +12,8 @@ FROM docker.io/library/ruby:$RUBY_VERSION-alpine AS base
 
 WORKDIR /rails
 
-# Shared base: no DB client yet (added in final stages)
-RUN apk add --no-cache curl jemalloc vips
+# Upgrade APK index and packages for security patches, then add runtime deps
+RUN apk update && apk upgrade --no-cache && apk add --no-cache curl jemalloc vips
 
 ENV RAILS_ENV="production" \
     BUNDLE_DEPLOYMENT="1" \

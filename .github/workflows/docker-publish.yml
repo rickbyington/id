@@ -68,6 +68,10 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+      - name: List vulnerabilities (Grype table)
+        run: |
+          docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
+            anchore/grype:latest ${{ secrets.DOCKERHUB_USERNAME }}/id:${{ steps.version.outputs.VERSION }} -o table || true
       - name: Scan Postgres image (Grype)
         uses: anchore/scan-action@v7
         with:
@@ -94,6 +98,10 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+      - name: List vulnerabilities standalone (Grype table)
+        run: |
+          docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
+            anchore/grype:latest ${{ secrets.DOCKERHUB_USERNAME }}/id:${{ steps.version.outputs.VERSION }}-standalone -o table || true
       - name: Scan standalone image (Grype)
         uses: anchore/scan-action@v7
         with:
