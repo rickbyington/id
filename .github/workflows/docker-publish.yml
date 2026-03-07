@@ -57,7 +57,7 @@ jobs:
 
       - name: Build Postgres image (no push)
         id: build-postgres
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           push: false
@@ -87,7 +87,7 @@ jobs:
 
       - name: Build standalone image (no push)
         id: build-standalone
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           target: standalone
