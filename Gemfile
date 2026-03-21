@@ -81,6 +81,6 @@ gem "omniauth-rails_csrf_protection"
 gem "doorkeeper"
 gem "doorkeeper-jwt"
 
-gem "doorkeeper-openid_connect", "~> 1.8"
+gem "doorkeeper-openid_connect", "~> 1.9"
 
 gem "signalwire"
